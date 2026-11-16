@@ -101,6 +101,14 @@ h3[style]::before{content:"";width:8px;height:8px;border-radius:50%;background:c
 .fx{position:fixed;pointer-events:none;font-family:var(--display);font-weight:800;font-size:17px;color:var(--mango);z-index:20;animation:fly .9s ease-out forwards;text-shadow:0 2px 10px rgba(14,18,48,.8)}
 @keyframes fly{0%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-64px)}}
 
+.tsec{justify-content:space-between;font-family:var(--display);font-size:17px;font-weight:700;color:var(--ink);margin:20px 0 9px}
+.tsec span{display:flex;align-items:center;gap:8px}
+.tsec em{font-style:normal;font-family:"Figtree",sans-serif;font-size:13px;font-weight:700;color:var(--mute)}
+.tsec .now{font-style:normal;font-family:"Figtree",sans-serif;font-size:11.5px;font-weight:800;color:var(--night);background:var(--palm);padding:2px 8px;border-radius:99px}
+.clab{font-size:12.5px;font-weight:700;color:var(--mute);margin:12px 2px 7px}
+.chk.comp{background:transparent;box-shadow:inset 0 0 0 1.5px var(--edge);padding-top:11px;padding-bottom:11px;font-size:15px}
+.chk.comp.on{box-shadow:none;background:linear-gradient(90deg,rgba(25,211,138,.3),rgba(25,211,138,.1))}
+.cdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;vertical-align:1px}
 /* inputs + buttons */
 label.f{display:block;font-size:13px;color:var(--mute);margin:14px 0 6px;font-weight:600}
 input,textarea,select{width:100%;min-width:0;background:var(--deep2);border:2px solid transparent;border-radius:14px;color:var(--ink);font:inherit;font-size:16px;padding:12px 13px}
@@ -165,6 +173,19 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--palm)}
 .catrow .row{font-size:14.5px;font-weight:700}
 .catrow .bar i{background:var(--c,var(--palm))}
 
+.tower{padding:0;overflow:hidden}
+.tw-head{padding:18px 18px 12px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.bank{background:linear-gradient(165deg,#222A6B 0%,#161B48 70%)}
+.nw{font-family:var(--display);font-size:56px;font-weight:800;color:#F2C230;letter-spacing:-.035em;line-height:1.05;margin:2px 0 12px;font-variant-numeric:tabular-nums}
+.pill.g{background:rgba(25,211,138,.16);color:var(--palm)}
+#hWorth{font-size:20px;line-height:1.2;color:#F2C230}
+.nwnext{margin-top:14px}
+.nwnext b{font-size:15px}
+.nwnext .bar i{background:#F2C230}
+.asset b{font-size:27px}
+.asset small{display:block;font-size:11px;font-weight:700;color:#F2C230;margin-top:3px}
+.asset.off small{color:var(--mute)}
+.tw-foot{padding:12px 18px 16px;margin:0}
 /* photos */
 .cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .cmp img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:16px;background:var(--deep2)}
@@ -216,7 +237,7 @@ nav button.on{color:var(--night);background:var(--palm)}
   <div class="hstats">
     <div class="hs"><b id="hStreak">0</b><span>day streak</span></div>
     <div class="hs"><b id="hMult">x1</b><span>XP boost</span></div>
-    <div class="hs"><b id="hCoins">0</b><span>coins</span></div>
+    <div class="hs"><b id="hWorth">$0</b><span>net worth</span></div>
     <div class="hs" id="hRioBox"><b id="hRio">-</b><span>days to Rio</span></div>
   </div>
 </div></header>
@@ -238,7 +259,7 @@ nav button.on{color:var(--night);background:var(--palm)}
         <div class="dh-txt">
           <div class="sub" id="dayLabel"></div>
           <h2 id="wkName"></h2>
-          <span class="pill" id="dayPill"></span> <span class="pill y" id="dayXp"></span>
+          <span class="pill" id="dayPill"></span> <span class="pill y" id="dayXp"></span> <span class="pill" id="dayBonus"></span>
         </div>
       </div>
       <div id="checks"></div>
@@ -301,6 +322,23 @@ nav button.on{color:var(--night);background:var(--palm)}
 
   <!-- GAME -->
   <section class="view" id="v-game">
+    <div class="card bank">
+      <div class="sub">Net worth</div>
+      <div class="nw" id="nwVal">$0</div>
+      <div class="row" style="gap:8px;flex-wrap:wrap"><span class="pill g" id="nwToday"></span><span class="pill" id="nwTitle"></span></div>
+      <div id="nwChart"></div>
+      <div class="nwnext">
+        <div class="row between"><b id="nwNextName"></b><span class="sub" id="nwNextLeft"></span></div>
+        <div class="bar"><i id="nwBar" style="width:0"></i></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row between"><h2 style="margin:0">Portfolio</h2><span class="sub" id="pfCount"></span></div>
+      <div class="sub" style="margin:4px 0 12px">Assets are added automatically as your net worth grows.</div>
+      <div class="badges" id="portfolio"></div>
+    </div>
+
     <div class="card hero">
       <div class="big"><small>Level</small><span id="gLvl">1</span></div>
       <div class="rank" id="gRank">Rookie</div>
@@ -309,7 +347,7 @@ nav button.on{color:var(--night);background:var(--palm)}
       <div class="stats" style="margin-top:14px;text-align:left">
         <div class="stat"><b id="gXp">0</b><span>Total XP</span></div>
         <div class="stat"><b id="gStreak">0</b><span>Day streak</span></div>
-        <div class="stat"><b id="gCoins">0</b><span>Coins</span></div>
+        <div class="stat"><b id="gAssets">0</b><span>Assets owned</span></div>
       </div>
       <div class="sub" id="gMultTxt" style="margin-top:12px"></div>
     </div>
@@ -323,7 +361,8 @@ nav button.on{color:var(--night);background:var(--palm)}
     </div>
 
     <div class="card">
-      <h2>Life areas</h2>
+      <div class="row between"><h2 style="margin:0">Your build</h2><span class="pill" id="clsName"></span></div>
+      <div id="radar"></div>
       <div id="cats"></div>
     </div>
 
@@ -332,17 +371,6 @@ nav button.on{color:var(--night);background:var(--palm)}
       <div class="badges" id="badges" style="margin-top:12px"></div>
     </div>
 
-    <div class="card">
-      <div class="row between"><h2 style="margin:0">Rewards shop</h2><span class="pill y" id="shopCoins"></span></div>
-      <div class="sub" style="margin:6px 0 4px">Earn 1 coin per XP. Spend them on rewards you've earned.</div>
-      <div id="shop"></div>
-      <div class="row" style="margin-top:12px;gap:8px">
-        <input id="rwName" placeholder="New reward" style="flex:2">
-        <input id="rwCost" type="number" inputmode="numeric" placeholder="Cost" style="flex:1">
-        <button class="btn" id="rwAdd">Add</button>
-      </div>
-      <div id="spent"></div>
-    </div>
   </section>
 
   <!-- PLAN -->
@@ -365,13 +393,17 @@ nav button.on{color:var(--night);background:var(--palm)}
   <section class="view" id="v-more">
     <div class="card">
       <h2>Your habits</h2>
-      <div class="sub">Tap ✎ to rename a habit or change its target, ↑ ↓ to reorder, × to remove.</div>
+      <div class="sub">Essential habits make up your daily score and streak. Complementary ones are bonus XP. Tap ✎ to edit, ↑ ↓ to reorder, × to remove.</div>
       <div id="habitList"></div>
       <h3>Add a habit</h3>
       <input id="hbName" placeholder="e.g. Read 20 pages" maxlength="40">
       <div class="row" style="margin-top:8px;gap:8px">
         <select id="hbCat"><option>Body</option><option>Mind</option><option>Money</option><option>Work</option></select>
         <select id="hbXp"><option value="5">Easy · 5 XP</option><option value="10" selected>Medium · 10 XP</option><option value="20">Hard · 20 XP</option></select>
+      </div>
+      <div class="row" style="margin-top:8px;gap:8px">
+        <select id="hbTime"><option value="am">Morning</option><option value="mid">Midday</option><option value="pm">Night</option><option value="any" selected>Anytime</option></select>
+        <select id="hbTier"><option value="e">Essential</option><option value="c">Complementary</option></select>
       </div>
       <div class="row" style="margin-top:8px;gap:8px">
         <select id="hbMode"><option value="both">Every day</option><option value="normal">Normal days only</option><option value="travel">Travel days only</option></select>
@@ -412,7 +444,7 @@ nav button.on{color:var(--night);background:var(--palm)}
       <div class="sub" style="margin-bottom:10px">Your data and photos live on this phone only. Export a backup now and then.</div>
       <div class="row"><button class="btn" id="expBtn" style="flex:1">Export backup</button><label class="btn ghost" style="flex:1;text-align:center">Import<input id="impIn" type="file" accept="application/json,.json" style="display:none"></label></div>
     </div>
-    <div class="saved">Lockd v12</div>
+    <div class="saved">Lockd v16</div>
   </section>
 </div>
 
@@ -503,10 +535,14 @@ const BADGES=[
   {id:"rio",i:"🌴",n:"Rio Ready",d:"15 locked-in days before the flight",t:g=>g.cutLocked>=15},
   {id:"photo",i:"📸",n:"Snapshot",d:"Add your first progress photo",t:g=>g.photoN>=1},
   {id:"multi",i:"🧠",n:"Renaissance",d:"Earn XP in 3 life areas",t:g=>Object.values(g.cat).filter(v=>v>0).length>=3},
-  {id:"shop",i:"🛍️",n:"Treat Yourself",d:"Redeem your first reward",t:g=>g.spentN>=1},
+  {id:"mill",i:"💵",n:"Millionaire",d:"Reach a net worth of $1M",t:g=>g.xp>=1000},
   {id:"x5k",i:"💰",n:"5K Club",d:"Earn 5,000 XP",t:g=>g.xp>=5000}
 ];
 
+const TIMES=[["am","Morning"],["mid","Midday"],["pm","Night"],["any","Anytime"]];
+const SEEDTT={sleep:["am","e"],trained:["am","e"],stairs:["am","c"],fasted:["mid","e"],kcal:["pm","e"],protein:["pm","e"],steps:["pm","e"],noalc:["pm","e"],t_sleep:["am","e"],t_move:["any","e"],t_protein:["pm","e"],t_steps:["pm","e"],t_water:["pm","e"]};
+function nowSlot(){ const h=new Date().getHours(); return h<12?"am":h<17?"mid":"pm"; }
+const isEss=h=>h.tier!=="c";
 const DEF={steps:[15000,"steps a day"],t_steps:[10000,"steps a day"],kcal:[1900,"kcal a day"],protein:[160,"grams a day"],sleep:[7.5,"hours"],t_sleep:[7,"hours"],t_water:[3,"litres"]};
 function tgt(h){ const d=DEF[h.id]; if(!d) return null; return (h.target>0)?+h.target:d[0]; }
 function tgtOf(id){ const h=state.habits.find(x=>x.id===id); return h?tgt(h):(DEF[id]?DEF[id][0]:null); }
@@ -533,6 +569,7 @@ function load(){ try{ const l=JSON.parse(localStorage.getItem("brazil-lockin")||
 function migrate(){
   state.v=2; if(!state.days) state.days={}; if(!(state.goal>0)) state.goal=72;
   if(!Array.isArray(state.habits)) state.habits=SEED.map(h=>Object.assign({from:STARTKEY},h));
+  state.habits.forEach(h=>{ const d=SEEDTT[h.id]; if(!h.time) h.time=d?d[0]:"any"; if(!h.tier) h.tier=d?d[1]:"e"; });
   if(!state.travel) state.travel={on:true,from:FLIGHTKEY,to:"2027-01-05"};
   if(!Array.isArray(state.rewards)) state.rewards=REWARDS.map(r=>Object.assign({},r));
   if(!Array.isArray(state.spent)) state.spent=[];
@@ -566,20 +603,20 @@ function bossFor(m){ let tv=0; for(let i=0;i<7;i++) if(isTravel(addK(m,i))) tv++
 
 function compute(){
   const info={}, cat={Body:0,Mind:0,Money:0,Work:0}, first=firstKey();
-  let streak=0,best=0,xp=0,perfectN=0,perfRun=0,bestPerf=0,noalc=0,cutLocked=0,weighN=0,firstW=null;
+  let lockedN=0,streak=0,best=0,xp=0,perfectN=0,perfRun=0,bestPerf=0,noalc=0,cutLocked=0,weighN=0,firstW=null;
   for(let k=first;k<=todayKey;k=addK(k,1)){
     const hs=habitsFor(k), rec=state.days[k], c=(rec&&rec.c)||{}, mult=multOf(streak);
-    let done=0,base=0;
-    hs.forEach(h=>{ if(c[h.id]){ done++; base+=h.xp; cat[h.cat]=(cat[h.cat]||0)+Math.round(h.xp*mult); } });
-    const pct=hs.length?done/hs.length:0, perfect=hs.length>0&&done===hs.length, locked=hs.length>0&&pct>=0.75;
+    let done=0,base=0,bonus=0; const es=hs.some(isEss)?hs.filter(isEss):hs, bonusTotal=hs.length-es.length;
+    hs.forEach(h=>{ if(c[h.id]){ if(es.indexOf(h)>=0) done++; else bonus++; base+=h.xp; cat[h.cat]=(cat[h.cat]||0)+Math.round(h.xp*mult); } });
+    const pct=es.length?done/es.length:0, perfect=es.length>0&&done===es.length, locked=es.length>0&&pct>=0.75;
     const dx=Math.round(base*mult)+(perfect?Math.round(50*mult):0);
     xp+=dx;
-    if(locked){ streak++; if(k<=CUT_END) cutLocked++; } else if(k!==todayKey) streak=0;
+    if(locked){ streak++; lockedN++; if(k<=CUT_END) cutLocked++; } else if(k!==todayKey) streak=0;
     if(perfect){ perfectN++; perfRun++; } else if(k!==todayKey) perfRun=0;
     if(streak>best) best=streak; if(perfRun>bestPerf) bestPerf=perfRun;
     if(c.noalc) noalc++;
     const w=wOf(k); if(w){ weighN++; if(firstW==null) firstW=w; }
-    info[k]={done,total:hs.length,pct,perfect,locked,xp:dx,mult};
+    info[k]={done,total:es.length,bonus,bonusTotal,pct,perfect,locked,xp:dx,mult};
   }
   const weeks=[]; let bossXp=0,bossN=0;
   for(let m=weekStart(first);m<=todayKey;m=addK(m,7)){
@@ -591,13 +628,13 @@ function compute(){
   xp+=bossXp;
   const level=levelOf(xp), trend=trendAt(todayKey);
   const spent=state.spent.reduce((a,s)=>a+(+s.cost||0),0);
-  const g={info,cat,streak,best,xp,perfectN,bestPerf,noalc,cutLocked,weighN,firstW,weeks,bossN,level,trend,goal:+state.goal||72,
+  const g={assetN:assetCount(xp),lockedN,info,cat,streak,best,xp,perfectN,bestPerf,noalc,cutLocked,weighN,firstW,weeks,bossN,level,trend,goal:+state.goal||72,
     lost:(trend!=null&&firstW!=null)?firstW-trend:0, coins:xp-spent, spentN:state.spent.length, photoN:photos.length,
     mult:multOf(streak)};
   g.badges=BADGES.filter(b=>{ try{return b.t(g);}catch(e){return false;} }).map(b=>b.id);
   return g;
 }
-function infoOf(k){ if(G.info[k]) return G.info[k]; const hs=habitsFor(k); return {done:0,total:hs.length,pct:0,perfect:false,locked:false,xp:0,mult:1}; }
+function infoOf(k){ if(G.info[k]) return G.info[k]; const hs=habitsFor(k), ne=hs.filter(isEss).length||hs.length; return {done:0,total:ne,bonus:0,bonusTotal:hs.length-ne,pct:0,perfect:false,locked:false,xp:0,mult:1}; }
 function tier(i){ return !i||i.done===0?"":i.pct>=0.75?"s3":i.pct>=0.5?"s2":"s1"; }
 function workoutFor(k){
   if(isTravel(k)) return WK.T;
@@ -642,10 +679,11 @@ function recompute(celebrate){
   G=compute();
   if(celebrate){
     if(G.level>prevLevel) modal({ico:"⬆️",kick:"Level up",title:"Level "+G.level,text:"Rank: "+rankOf(G.level)+". Keep stacking days.",party:200});
+    for(let i=(state.lastAsset||0);i<G.assetN;i++){ const a=ASSETS[i], nx=ASSETS[i+1]; modal({ico:a[1],kick:"Added to your portfolio",title:a[0],text:"Net worth passed "+money(a[2]*1000)+"."+(nx?" Next: "+nx[0]+" at "+money(nx[2]*1000)+".":""),party:a[2]>=1000?220:130,ok:"Keep stacking"}); }
     G.badges.forEach(id=>{ if(state.seenBadges.indexOf(id)<0){ const b=BADGES.find(x=>x.id===id); modal({ico:b.i,kick:"Badge unlocked",title:b.n,text:b.d,party:120,ok:"Nice"}); } });
     G.weeks.forEach(w=>{ if(w.done&&!state.seenBoss[w.m]) modal({ico:"⚔️",kick:"Boss defeated",title:w.b.n,text:"+"+w.b.xp+" XP bonus. A new boss arrives Monday.",party:220}); });
   }
-  state.lastLevel=G.level;
+  state.lastLevel=G.level; state.lastAsset=G.assetN;
   G.badges.forEach(id=>{ if(state.seenBadges.indexOf(id)<0) state.seenBadges.push(id); });
   G.weeks.forEach(w=>{ if(w.done) state.seenBoss[w.m]=1; });
 }
@@ -655,7 +693,7 @@ function renderHeader(){
   const L=G.level, a=need(L), b=need(L+1), p=Math.max(0,Math.min(1,(G.xp-a)/(b-a)));
   $("hLvl").textContent=L; $("hRank").textContent=rankOf(L);
   $("hXp").textContent=num(G.xp-a)+" / "+num(b-a)+" XP"; $("hBar").style.width=(p*100)+"%";
-  $("hStreak").textContent=G.streak; $("hMult").textContent="x"+G.mult; $("hCoins").textContent=num(Math.max(0,G.coins));
+  $("hStreak").textContent=G.streak; $("hMult").textContent="x"+G.mult; $("hWorth").textContent=money(G.xp*1000);
   const left=diffK(FLIGHTKEY,todayKey); $("hRioBox").style.display=left>0?"":"none"; $("hRio").textContent=left;
 }
 function renderStrip(){
@@ -665,7 +703,7 @@ function renderStrip(){
   $("strip").innerHTML=h;
   const el=$("strip").querySelector(".sel"); if(el&&el.scrollIntoView) el.scrollIntoView({inline:"center",block:"nearest"});
 }
-function chkHtml(h,on){ return `<button class="chk ${on?"on":""}" data-id="${esc(h.id)}"><span class="box"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0E1230" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="ct">${esc(h.name)}${h.sub?`<em>${esc(h.sub)}</em>`:""}</span><span class="xp">+${h.xp} XP</span></button>`; }
+function chkHtml(h,on){ return `<button class="chk ${on?"on":""} ${isEss(h)?"":"comp"}" data-id="${esc(h.id)}"><span class="box"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0E1230" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="ct">${esc(h.name)}${h.sub?`<em>${esc(h.sub)}</em>`:""}</span><span class="xp"><i class="cdot" style="background:${CATS[h.cat]||"#fff"}"></i>+${h.xp} XP</span></button>`; }
 function renderToday(){
   const d=parse(sel), w=workoutFor(sel), rec=state.days[sel]||{c:{}}, c=rec.c||{}, hs=habitsFor(sel), tv=isTravel(sel);
   $("dayLabel").textContent=DOW[d.getDay()]+" "+d.getDate()+" "+MON[d.getMonth()]+(sel===todayKey?" · Today":"");
@@ -674,8 +712,10 @@ function renderToday(){
   if(tv){ pill.textContent="Travel mode"; pill.className="pill b"; }
   else if(sel>=STARTKEY&&sel<=CUT_END){ pill.textContent="Cut day "+(diffK(sel,STARTKEY)+1)+" of 19"; pill.className="pill"; }
   else { pill.textContent="Lock-in"; pill.className="pill"; }
-  const cats=Object.keys(CATS).filter(cn=>hs.some(h=>h.cat===cn)); let h="";
-  cats.forEach(cn=>{ if(cats.length>1) h+=`<h3 style="color:${CATS[cn]}">${cn}</h3>`; else h+=`<div style="height:10px"></div>`; h+=`<div class="checks">`+hs.filter(x=>x.cat===cn).map(x=>chkHtml(x,c[x.id])).join("")+`</div>`; });
+  let h=""; const slot=sel===todayKey?nowSlot():null;
+  TIMES.forEach(t=>{ const l=hs.filter(x=>(x.time||"any")===t[0]); if(!l.length) return; const e=l.filter(isEss), cm=l.filter(x=>!isEss(x)), dn=l.filter(x=>c[x.id]).length;
+    h+=`<h3 class="tsec"><span>${t[1]}${slot===t[0]?' <i class="now">Now</i>':""}</span><em>${dn}/${l.length}</em></h3><div class="checks">`+e.map(x=>chkHtml(x,c[x.id])).join("")+`</div>`;
+    if(cm.length) h+=`<div class="clab">Complementary</div><div class="checks">`+cm.map(x=>chkHtml(x,c[x.id])).join("")+`</div>`; });
   if(!hs.length) h=`<div class="sub" style="padding:14px 0">No habits for this day. Add some in More.</div>`;
   $("checks").innerHTML=h;
   $("weight").value=rec.w||""; $("topset").value=rec.ts||""; $("notes").value=rec.n||"";
@@ -692,6 +732,7 @@ function renderScore(){
   $("scoreTxt").textContent=i.done+"/"+i.total;
   $("ringArc").style.strokeDashoffset=251.3*(1-i.pct);
   $("ringArc").setAttribute("stroke",i.perfect?"#19D38A":"url(#sun)");
+  $("dayBonus").textContent=i.bonus+"/"+i.bonusTotal+" extra"; $("dayBonus").style.display=i.bonusTotal?"":"none";
   $("dayXp").textContent="+"+i.xp+" XP"+(i.mult>1?" · x"+i.mult:""); $("dayXp").style.display=sel>todayKey?"none":"";
 }
 function review(m){
@@ -765,16 +806,58 @@ function renderGame(){
   const nr=RANKS.find(r=>r[0]>L);
   $("gNext").textContent=num(b-G.xp)+" XP to level "+(L+1)+(nr?" · "+nr[1]+" at level "+nr[0]:"");
   $("gBar").style.width=(Math.max(0,Math.min(1,(G.xp-a)/(b-a)))*100)+"%";
-  $("gXp").textContent=num(G.xp); $("gStreak").textContent=G.streak; $("gCoins").textContent=num(Math.max(0,G.coins));
+  $("gXp").textContent=num(G.xp); $("gStreak").textContent=G.streak; $("gAssets").textContent=G.assetN;
   $("gMultTxt").textContent=G.streak>=14?"🔥 Max boost active: x2 XP on everything.":G.streak>=7?"🔥 x1.5 XP active. "+(14-G.streak)+" more locked-in days for x2.":(7-G.streak)+" more locked-in days (75%+) for x1.5 XP.";
   const w=G.weeks[G.weeks.length-1];
   if(w){ $("bName").textContent=w.b.n; $("bDesc").textContent=w.b.d; $("bXp").textContent="+"+w.b.xp+" XP"; $("bBar").style.width=Math.min(100,w.prog/w.b.target*100)+"%"; $("bProg").textContent=w.done?"Defeated ✅":w.prog+" / "+w.b.target; const left=6-diffK(todayKey,w.m); $("bLeft").textContent=left===0?"Last day":left+" day"+(left>1?"s":"")+" left"; }
   $("cats").innerHTML=Object.keys(CATS).map(cn=>{ const v=G.cat[cn]||0; let cl=1; while(100*cl*(cl+1)/2<=v) cl++; const lo=100*(cl-1)*cl/2, hi=100*cl*(cl+1)/2; return `<div class="catrow" style="--c:${CATS[cn]}"><div class="row between"><span>${cn} <span class="sub">· Level ${cl}</span></span><span class="sub">${num(v)} XP</span></div><div class="bar"><i style="width:${(v-lo)/(hi-lo)*100}%"></i></div></div>`; }).join("");
   $("bdgCount").textContent=G.badges.length+" / "+BADGES.length;
   $("badges").innerHTML=BADGES.map(bd=>`<div class="bdg ${G.badges.indexOf(bd.id)<0?"off":""}" data-b="${bd.id}"><b>${bd.i}</b><span>${esc(bd.n)}</span></div>`).join("");
-  const coins=Math.max(0,G.coins); $("shopCoins").textContent="🪙 "+num(coins);
-  $("shop").innerHTML=state.rewards.length?state.rewards.map(r=>`<div class="ex"><div>${esc(r.name)}<small>🪙 ${num(r.cost)}</small></div><div class="row" style="gap:2px"><button class="btn sm" data-buy="${esc(r.id)}" ${coins<r.cost?"disabled":""}>Redeem</button><button class="x" data-rm="${esc(r.id)}" aria-label="Remove">×</button></div></div>`).join(""):'<div class="sub" style="padding:10px 0">No rewards yet. Add one.</div>';
-  $("spent").innerHTML=state.spent.length?`<h3>Redeemed</h3>`+state.spent.slice(-5).reverse().map(s=>`<div class="ex"><div>${esc(s.name)}</div><span>${fmt(s.date)} · 🪙 ${num(s.cost)}</span></div>`).join(""):"";
+  renderBank(); renderRadar();
+}
+const ASSETS=[["Emergency fund","🏦",100],["First car","🚗",250],["Studio apartment","🏢",500],["City apartment","🏙️",1000],["Sports car","🏎️",2000],["Beach house in Rio","🏖️",3000],["Penthouse","🌆",5000],["Yacht","🛥️",7500],["Office building","🏬",10000],["Private jet","🛩️",15000],["Fazenda","🌾",20000],["Skyscraper","🏗️",25000],["Private island","🏝️",30000]];
+const WEALTH=[[0,"Starting out"],[100,"Saver"],[500,"Investor"],[1000,"Millionaire"],[5000,"Multi-millionaire"],[10000,"Tycoon"],[25000,"Mogul"]];
+function assetCount(xp){ return ASSETS.filter(a=>xp>=a[2]).length; }
+function money(v){ v=Math.max(0,v); if(v>=1e7) return "$"+(v/1e6).toFixed(1).replace(/\.0$/,"")+"M"; if(v>=1e6) return "$"+(v/1e6).toFixed(2).replace(/\.?0+$/,"")+"M"; if(v>=1000) return "$"+Math.round(v/1000)+"K"; return "$"+Math.round(v); }
+let nwAnim=null;
+function countUp(){ const el=$("nwVal"), target=G.xp*1000; cancelAnimationFrame(nwAnim);
+  let still=false; try{ still=window.matchMedia("(prefers-reduced-motion:reduce)").matches; }catch(e){}
+  if(still||target<=0){ el.textContent=money(target); return; }
+  const t0=performance.now(), dur=900; (function step(t){ const p=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-p,3); el.textContent=money(target*e); if(p<1) nwAnim=requestAnimationFrame(step); })(t0); }
+function renderBank(){
+  const xp=G.xp, tx=(G.info[todayKey]||{}).xp||0;
+  if(!$("v-game").classList.contains("on")) $("nwVal").textContent=money(xp*1000);
+  $("nwToday").textContent="+"+money(tx*1000)+" banked today"; $("nwToday").style.display=tx>0?"":"none";
+  let title=WEALTH[0][1]; WEALTH.forEach(w=>{ if(xp>=w[0]) title=w[1]; }); $("nwTitle").textContent=title;
+  // growth chart: cumulative by day, weekly boss bonus lands on the week's last elapsed day
+  const bossAt={}; G.weeks.forEach(w=>{ if(w.done){ let k=addK(w.m,6); if(k>todayKey) k=todayKey; bossAt[k]=(bossAt[k]||0)+w.b.xp; } });
+  const pts=[]; let cum=0; for(let k=firstKey();k<=todayKey;k=addK(k,1)){ cum+=((G.info[k]||{}).xp||0)+(bossAt[k]||0); pts.push(cum); }
+  const W=320,H=120,pl=4,pr=4,pt=10,pb=8, mx=Math.max(pts[pts.length-1],1), n=pts.length;
+  const X=i=>n>1?pl+(W-pl-pr)*i/(n-1):W/2, Y=v=>pt+(H-pt-pb)*(1-v/mx);
+  let o=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;margin-top:14px" role="img" aria-label="Net worth over time"><line x1="0" x2="${W}" y1="${H-pb}" y2="${H-pb}" stroke="#2F3879"/>`;
+  if(n>1){ const line=pts.map((v,i)=>(i?"L":"M")+X(i).toFixed(1)+" "+Y(v).toFixed(1)).join(" ");
+    o+=`<path d="${line} L${X(n-1).toFixed(1)} ${H-pb} L${X(0).toFixed(1)} ${H-pb}Z" fill="#F2C230" opacity=".13"/><path d="${line}" fill="none" stroke="#F2C230" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`; }
+  o+=`<circle cx="${X(n-1).toFixed(1)}" cy="${Y(pts[n-1]).toFixed(1)}" r="5" fill="#F2C230" stroke="#161B48" stroke-width="2.5"/></svg>`;
+  $("nwChart").innerHTML=o+`<div class="row between sub" style="font-size:12px;margin-top:4px"><span>${fmt(firstKey())}</span><span>${n} day${n>1?"s":""}</span><span>Today</span></div>`;
+  const nx=ASSETS[G.assetN], pv=G.assetN?ASSETS[G.assetN-1][2]:0;
+  if(nx){ $("nwNextName").textContent="Next: "+nx[1]+" "+nx[0]; $("nwNextLeft").textContent=money((nx[2]-xp)*1000)+" to go"; $("nwBar").style.width=Math.max(2,Math.min(100,(xp-pv)/(nx[2]-pv)*100))+"%"; }
+  else { $("nwNextName").textContent="Portfolio complete"; $("nwNextLeft").textContent=""; $("nwBar").style.width="100%"; }
+  $("pfCount").textContent=G.assetN+" of "+ASSETS.length;
+  $("portfolio").innerHTML=ASSETS.map((a,i)=>`<div class="bdg asset ${i<G.assetN?"":"off"}"><b>${a[1]}</b><span>${esc(a[0])}</span><small>${money(a[2]*1000)}</small></div>`).join("");
+}
+function renderRadar(){
+  const cs=Object.keys(CATS), vals=cs.map(c=>G.cat[c]||0), mx=Math.max.apply(null,vals.concat([1])), W=300,H=230,cx=150,cy=115,R=74;
+  const pt=(i,r)=>[(cx+Math.cos(-Math.PI/2+i*Math.PI/2)*r).toFixed(1),(cy+Math.sin(-Math.PI/2+i*Math.PI/2)*r).toFixed(1)];
+  const poly=r=>cs.map((c,i)=>pt(i,r).join(",")).join(" ");
+  let o=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;max-width:340px;margin:6px auto 0" role="img" aria-label="Balance across life areas">`;
+  [1,.66,.33].forEach(f=>{ o+=`<polygon points="${poly(R*f)}" fill="${f===1?"rgba(32,40,94,.6)":"none"}" stroke="#2F3879" stroke-width="1.2"/>`; });
+  cs.forEach((c,i)=>{ const p=pt(i,R); o+=`<line x1="${cx}" y1="${cy}" x2="${p[0]}" y2="${p[1]}" stroke="#2F3879" stroke-width="1.2"/>`; });
+  const rs=vals.map(v=>v>0?R*(0.14+0.86*Math.sqrt(v/mx)):R*0.07);
+  o+=`<polygon points="${cs.map((c,i)=>pt(i,rs[i]).join(",")).join(" ")}" fill="rgba(25,211,138,.28)" stroke="#19D38A" stroke-width="2.5" stroke-linejoin="round"/>`;
+  cs.forEach((c,i)=>{ const p=pt(i,rs[i]), l=pt(i,R+14); o+=`<circle cx="${p[0]}" cy="${p[1]}" r="4.5" fill="${CATS[c]}"/><text x="${l[0]}" y="${+l[1]+(i===0?-2:i===2?10:4)}" font-size="13" font-weight="700" fill="#F7F4FF" text-anchor="${i===1?"start":i===3?"end":"middle"}">${c}</text>`; });
+  $("radar").innerHTML=o+`</svg>`;
+  const T={Body:"Athlete",Mind:"Scholar",Money:"Investor",Work:"Operator"}, ord=cs.slice().sort((a,b)=>(G.cat[b]||0)-(G.cat[a]||0)), top=G.cat[ord[0]]||0;
+  $("clsName").textContent=top<=0?"Unranked":vals.every(v=>v>=top*0.5)?"All-rounder":(G.cat[ord[1]]||0)>=top*0.6?T[ord[0]]+" and "+T[ord[1]]:T[ord[0]];
 }
 function renderPlan(){
   $("planWk").innerHTML=["A","B","C"].map(k=>`<div class="card"><h2>${WK[k].name}</h2>${WK[k].ex.map(e=>`<div class="ex"><div>${esc(e[0])}${e[2]?`<small>${esc(e[2])}</small>`:""}</div><span>${esc(e[1])}</span></div>`).join("")}</div>`).join("")
@@ -787,7 +870,7 @@ function renderTargets(){ const k=tgtOf("kcal"),p=tgtOf("protein"),st=tgtOf("ste
   $("autoList").innerHTML=rows.map(r=>{ const h=state.habits.find(x=>x.id===r[0]&&(!x.to||x.to>=todayKey)); if(!h) return ""; return `<div class="ex"><div>${esc(h.name)}<small>${r[0]==="kcal"?"At or under ":"At least "}${num(tgt(h))===String(tgt(h))||tgt(h)>=1000?num(tgt(h)):tgt(h)} ${DEF[r[0]][1]}${h.mode==="travel"?" · travel days":""}</small></div><span>${r[1]}</span></div>`; }).join("")+`<div class="ex"><div>Trained<small>If a workout was recorded</small></div><span>workout</span></div><div class="ex"><div>Morning weight</div><span>weight</span></div>`; }
 function renderMore(){
   const act=state.habits.filter(h=>!h.to||h.to>=todayKey); let h="";
-  Object.keys(CATS).forEach(cn=>{ const l=act.filter(x=>x.cat===cn); if(!l.length) return; h+=`<h3 style="color:${CATS[cn]}">${cn}</h3>`+l.map((x,i)=>`<div class="ex"><div style="min-width:0">${esc(x.name)}<small>+${x.xp} XP · ${x.mode==="both"?"Every day":x.mode==="travel"?"Travel days":"Normal days"}${DEF[x.id]?" · target "+(tgt(x)>=1000?num(tgt(x)):tgt(x)):""}</small></div><div class="hbtns"><button class="x" data-hup="${esc(x.id)}" ${i===0?"disabled":""} aria-label="Move up">↑</button><button class="x" data-hdn="${esc(x.id)}" ${i===l.length-1?"disabled":""} aria-label="Move down">↓</button><button class="x" data-hed="${esc(x.id)}" aria-label="Edit">✎</button><button class="x" data-hdel="${esc(x.id)}" aria-label="Remove">×</button></div></div>`).join(""); });
+  TIMES.forEach(t=>{ const l=act.filter(x=>(x.time||"any")===t[0]); if(!l.length) return; h+=`<h3>${t[1]}</h3>`+l.map((x,i)=>`<div class="ex"><div style="min-width:0"><i class="cdot" style="background:${CATS[x.cat]||"#fff"}"></i>${esc(x.name)}<small>${isEss(x)?"Essential":"Complementary"} · ${x.cat} · +${x.xp} XP${x.mode==="travel"?" · travel days":x.mode==="both"?" · every day":""}${DEF[x.id]?" · target "+(tgt(x)>=1000?num(tgt(x)):tgt(x)):""}</small></div><div class="hbtns"><button class="x" data-hup="${esc(x.id)}" ${i===0?"disabled":""} aria-label="Move up">↑</button><button class="x" data-hdn="${esc(x.id)}" ${i===l.length-1?"disabled":""} aria-label="Move down">↓</button><button class="x" data-hed="${esc(x.id)}" aria-label="Edit">✎</button><button class="x" data-hdel="${esc(x.id)}" aria-label="Remove">×</button></div></div>`).join(""); });
   $("habitList").innerHTML=h; renderTargets();
   $("tvSw").classList.toggle("on",!!state.travel.on); $("tvFrom").value=state.travel.from||""; $("tvTo").value=state.travel.to||"";
   $("sndSw").classList.toggle("on",!!state.sound); $("goalIn").value=state.goal;
@@ -801,6 +884,7 @@ function show(v){
   document.querySelectorAll(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
   window.scrollTo(0,0);
+  if(v==="game") countUp();
 }
 document.querySelector("nav").addEventListener("click",e=>{ const b=e.target.closest("button"); if(b) show(b.dataset.v); });
 $("strip").addEventListener("click",e=>{ const t=e.target.closest(".d"); if(!t) return; sel=t.dataset.k; renderStrip(); renderToday(); });
@@ -816,6 +900,7 @@ $("checks").addEventListener("click",e=>{
   if(on){ b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); const i=infoOf(sel); floatXp(e.clientX||window.innerWidth/2,e.clientY||200,"+"+Math.round((hb?hb.xp:10)*i.mult)+" XP"); beep([740+i.done*40],0.09); buzz(12);
     if(i.perfect&&!was){ floatXp(window.innerWidth/2,window.innerHeight/2,"PERFECT DAY +"+Math.round(50*i.mult)+" XP"); if(!mOpen&&!mq.length){ confetti(150); beep([523,659,784],0.14); buzz([20,30,60]); } toast(i.done+"/"+i.total+". Locked in."); } }
   renderHeader(); renderScore(); renderStrip(); renderStats(); renderGame(); save();
+  document.querySelectorAll("#checks .tsec").forEach(hd=>{ const box=hd.nextElementSibling; let rows=[...box.querySelectorAll(".chk")]; const nx=box.nextElementSibling; if(nx&&nx.classList.contains("clab")) rows=rows.concat([...nx.nextElementSibling.querySelectorAll(".chk")]); hd.querySelector("em").textContent=rows.filter(r=>r.classList.contains("on")).length+"/"+rows.length; });
 });
 function bindInput(id,field){ $(id).addEventListener("input",()=>{ if(sel>todayKey&&field==="w"){ return; } const d=day(sel); d[field]=$(id).value; d.t=Date.now(); save(); }); }
 $("weight").addEventListener("change",()=>{ if(sel>todayKey){ $("weight").value=""; toast("You can't log the future"); return; } recompute(true); renderHeader(); renderStats(); renderGame(); save(); });
@@ -826,19 +911,11 @@ $("goalBtn").addEventListener("click",()=>{ const v=parseFloat($("goalIn").value
 
 /* badges + shop */
 $("badges").addEventListener("click",e=>{ const t=e.target.closest(".bdg"); if(!t) return; const b=BADGES.find(x=>x.id===t.dataset.b); const got=G.badges.indexOf(b.id)>=0; modal({ico:b.i,kick:got?"Unlocked":"Locked",title:b.n,text:b.d,ok:"OK"}); });
-$("shop").addEventListener("click",e=>{
-  const buy=e.target.closest("[data-buy]"), rm=e.target.closest("[data-rm]");
-  if(buy){ const r=state.rewards.find(x=>x.id===buy.dataset.buy); if(!r||G.coins<r.cost) return;
-    modal({ico:"🛍️",kick:"Redeem reward",title:r.name,text:"Spend "+num(r.cost)+" coins? You earned it.",ok:"Redeem",cancel:"Not yet",onOk:()=>{ state.spent.push({id:r.id,name:r.name,cost:r.cost,date:todayKey}); changed(true); confetti(120); beep([659,784,1047],0.14); toast("Enjoy it. You earned it."); }}); }
-  if(rm){ state.rewards=state.rewards.filter(x=>x.id!==rm.dataset.rm); changed(false); }
-});
-$("rwAdd").addEventListener("click",()=>{ const n=$("rwName").value.trim(), c=Math.round(parseFloat($("rwCost").value)); if(!n){ toast("Name the reward"); return; } if(!(c>0)){ toast("Set a coin cost"); return; } state.rewards.push({id:"r"+Date.now(),name:n.slice(0,40),cost:c}); $("rwName").value=""; $("rwCost").value=""; changed(false); });
-
 /* habits */
 $("hbAdd").addEventListener("click",()=>{ const n=$("hbName").value.trim(); if(!n){ toast("Name the habit"); return; }
-  state.habits.push({id:"h"+Date.now(),name:n.slice(0,40),sub:"",cat:$("hbCat").value,xp:+$("hbXp").value||10,mode:$("hbMode").value,from:todayKey});
+  state.habits.push({id:"h"+Date.now(),name:n.slice(0,40),sub:"",cat:$("hbCat").value,xp:+$("hbXp").value||10,mode:$("hbMode").value,time:$("hbTime").value,tier:$("hbTier").value,from:todayKey});
   $("hbName").value=""; changed(false); toast("Habit added"); });
-function moveHabit(id,dir){ const h=state.habits.find(x=>x.id===id); if(!h) return; const l=state.habits.filter(x=>x.cat===h.cat&&(!x.to||x.to>=todayKey)); const i=l.indexOf(h), o=l[i+dir]; if(!o) return; const a=state.habits.indexOf(h), b=state.habits.indexOf(o); state.habits[a]=o; state.habits[b]=h; changed(false); }
+function moveHabit(id,dir){ const h=state.habits.find(x=>x.id===id); if(!h) return; const l=state.habits.filter(x=>(x.time||"any")===(h.time||"any")&&(!x.to||x.to>=todayKey)); const i=l.indexOf(h), o=l[i+dir]; if(!o) return; const a=state.habits.indexOf(h), b=state.habits.indexOf(o); state.habits[a]=o; state.habits[b]=h; changed(false); }
 function editHabit(id){ const h=state.habits.find(x=>x.id===id); if(!h) return; const d=DEF[h.id];
   const sel=(idn,opts,cur)=>`<select id="${idn}">`+opts.map(o=>`<option value="${o[0]}" ${String(o[0])===String(cur)?"selected":""}>${o[1]}</option>`).join("")+`</select>`;
   const html=`<label class="f">Name</label><input id="edName" maxlength="40" value="${esc(h.name)}">`
@@ -846,11 +923,13 @@ function editHabit(id){ const h=state.habits.find(x=>x.id===id); if(!h) return; 
     +(d?`<label class="f">Target (${d[1]})</label><input id="edTarget" type="number" inputmode="decimal" step="any" value="${tgt(h)}">`:"")
     +`<label class="f">Life area</label>`+sel("edCat",Object.keys(CATS).map(c=>[c,c]),h.cat)
     +`<label class="f">Difficulty</label>`+sel("edXp",[[5,"Easy · 5 XP"],[10,"Medium · 10 XP"],[15,"Tough · 15 XP"],[20,"Hard · 20 XP"]],h.xp)
-    +`<label class="f">When</label>`+sel("edMode",[["both","Every day"],["normal","Normal days only"],["travel","Travel days only"]],h.mode);
+    +`<label class="f">Time of day</label>`+sel("edTime",TIMES,h.time||"any")
+    +`<label class="f">Type</label>`+sel("edTier",[["e","Essential · counts toward your score and streak"],["c","Complementary · bonus XP only"]],h.tier||"e")
+    +`<label class="f">Days</label>`+sel("edMode",[["both","Every day"],["normal","Normal days only"],["travel","Travel days only"]],h.mode);
   modal({title:"Edit habit",html,ok:"Save",cancel:"Cancel",onOk:()=>{
     let n=$("edName").value.trim(); if(!n){ toast("Give it a name"); return false; }
     if(d){ const t=parseFloat($("edTarget").value); if(!(t>0)){ toast("Enter a target above zero"); return false; } const old=tgt(h); if(t!==old){ if(n===h.name) n=renameForTarget(n,old,t); h.target=t; } }
-    h.name=n.slice(0,40); h.sub=$("edSub").value.trim().slice(0,40); h.cat=$("edCat").value; h.xp=+$("edXp").value||10; h.mode=$("edMode").value;
+    h.name=n.slice(0,40); h.sub=$("edSub").value.trim().slice(0,40); h.cat=$("edCat").value; h.xp=+$("edXp").value||10; h.mode=$("edMode").value; h.time=$("edTime").value; h.tier=$("edTier").value;
     changed(false); toast("Habit updated"); }}); }
 $("habitList").addEventListener("click",e=>{ const up=e.target.closest("[data-hup]"), dn=e.target.closest("[data-hdn]"), ed=e.target.closest("[data-hed]");
   if(up){ moveHabit(up.dataset.hup,-1); return; } if(dn){ moveHabit(dn.dataset.hdn,1); return; } if(ed){ editHabit(ed.dataset.hed); return; }
