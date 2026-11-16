@@ -210,7 +210,8 @@ nav button.on{color:var(--green);background:rgba(31,196,107,.1)}
     </div>
 
     <div class="card">
-      <h2>Log</h2>
+      <div class="row between" style="margin-bottom:10px"><h2 style="margin:0">Log</h2><button class="btn sm" id="syncBtn">⟳ Sync from Health</button></div>
+      <div class="sub" id="syncLine" style="margin:-2px 0 10px;display:none"></div>
       <div class="row">
         <div style="flex:1"><label class="f" style="margin-top:0">Morning weight (kg)</label><input id="weight" type="number" inputmode="decimal" step="0.1" placeholder="e.g. 73.4"></div>
         <div style="flex:1"><label class="f" style="margin-top:0">Main lift top set</label><input id="topset" type="text" placeholder="e.g. 80kg x 6"></div>
@@ -344,6 +345,21 @@ nav button.on{color:var(--green);background:rgba(31,196,107,.1)}
     </div>
 
     <div class="card">
+      <h2>Apple Health sync</h2>
+      <div class="sub">Run your "Sync Lock-In" shortcut, then tap Sync. Steps, calories, protein, sleep and weight fill in and the matching habits tick themselves.</div>
+      <button class="btn" id="syncBtn2" style="width:100%;margin-top:12px">⟳ Sync from Health</button>
+      <label class="f">Or paste the shortcut's text here</label>
+      <div class="row"><input id="syncTxt" placeholder="LOCKIN date=... steps=..." style="flex:1"><button class="btn ghost" id="syncGo">Apply</button></div>
+      <h3>What ticks automatically</h3>
+      <div class="ex"><div>15k steps<small>10k on travel days</small></div><span>steps</span></div>
+      <div class="ex"><div>Under 1,900<small>Sync after your last meal</small></div><span>kcal</span></div>
+      <div class="ex"><div>160g+ protein</div><span>protein</span></div>
+      <div class="ex"><div>7.5h+ sleep<small>7h on travel days</small></div><span>sleep</span></div>
+      <div class="ex"><div>Trained<small>If a workout was recorded</small></div><span>workout</span></div>
+      <div class="ex"><div>Morning weight</div><span>weight</span></div>
+    </div>
+
+    <div class="card">
       <div class="row between"><h2 style="margin:0">Travel mode</h2><button class="sw" id="tvSw" aria-label="Travel mode"></button></div>
       <div class="sub" style="margin-top:6px">Between these dates the app switches to a lighter checklist so your streak survives the trip.</div>
       <div class="row" style="margin-top:10px">
@@ -366,7 +382,7 @@ nav button.on{color:var(--green);background:rgba(31,196,107,.1)}
       <div class="sub" style="margin-bottom:10px">Your data and photos live on this phone only. Export a backup now and then.</div>
       <div class="row"><button class="btn" id="expBtn" style="flex:1">Export backup</button><label class="btn ghost" style="flex:1;text-align:center">Import<input id="impIn" type="file" accept="application/json,.json" style="display:none"></label></div>
     </div>
-    <div class="saved">Lock-In v2</div>
+    <div class="saved">Lock-In v3</div>
   </section>
 </div>
 
@@ -628,6 +644,8 @@ function renderToday(){
   if(!hs.length) h=`<div class="sub" style="padding:14px 0">No habits for this day. Add some in More.</div>`;
   $("checks").innerHTML=h;
   $("weight").value=rec.w||""; $("topset").value=rec.ts||""; $("notes").value=rec.n||"";
+  const sy=rec.sync, sl=$("syncLine");
+  if(sy){ const b=[]; if(sy.steps!=null) b.push(num(sy.steps)+" steps"); if(sy.kcal!=null) b.push(num(sy.kcal)+" kcal"); if(sy.protein!=null) b.push(Math.round(sy.protein)+"g protein"); if(sy.sleep!=null) b.push(sy.sleep.toFixed(1)+"h sleep"); sl.textContent="Synced: "+b.join(" · "); sl.style.display=b.length?"block":"none"; } else sl.style.display="none";
   $("dayTip").textContent=TIPS[sel]||""; $("dayTip").style.display=TIPS[sel]?"block":"none";
   $("wkList").innerHTML=w.ex.map(e=>`<div class="ex"><div>${esc(e[0])}${e[2]?`<small>${esc(e[2])}</small>`:""}</div><span>${esc(e[1])}</span></div>`).join("");
   const lastM=addK(weekStart(todayKey),-7);
@@ -790,6 +808,42 @@ $("tvSw").addEventListener("click",()=>{ state.travel.on=!state.travel.on; chang
 $("tvFrom").addEventListener("change",()=>{ state.travel.from=$("tvFrom").value; changed(false); });
 $("tvTo").addEventListener("change",()=>{ state.travel.to=$("tvTo").value; changed(false); });
 $("sndSw").addEventListener("click",()=>{ state.sound=!state.sound; renderMore(); save(); if(state.sound) beep([880],0.1); });
+
+/* health sync */
+const AUTO=[{m:"steps",id:"steps",min:15000},{m:"steps",id:"t_steps",min:10000},{m:"kcal",id:"kcal",max:1900},{m:"protein",id:"protein",min:160},{m:"sleep",id:"sleep",min:7.5},{m:"sleep",id:"t_sleep",min:7},{m:"water",id:"t_water",min:3},{m:"workout",id:"trained",min:1},{m:"workout",id:"t_move",min:1}];
+function toNum(v){ v=String(v).replace(/[.,]+$/,""); if(/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(v)) v=v.replace(/,/g,""); else if(/^\d+,\d+$/.test(v)) v=v.replace(",","."); const n=parseFloat(v); return isFinite(n)?n:null; }
+function parseSync(txt){
+  const o={}; txt=String(txt||""); const dm=/date\s*[=:]\s*(\d{4}-\d{1,2}-\d{1,2})/i.exec(txt);
+  if(dm){ const p=dm[1].split("-"); o.date=p[0]+"-"+p[1].padStart(2,"0")+"-"+p[2].padStart(2,"0"); }
+  const re=/([a-z]+)\s*[=:]\s*(\d[\d.,]*)/gi; let m, n=0;
+  while((m=re.exec(txt))){ const k=m[1].toLowerCase(); if(k==="date") continue; const v=toNum(m[2]); if(v==null) continue;
+    if(k==="steps"){ o.steps=Math.round(v); n++; } else if(k==="kcal"||k==="calories"||k==="cal"){ o.kcal=v; n++; } else if(k==="kj"){ o.kcal=v/4.184; n++; }
+    else if(k==="protein"){ o.protein=v; n++; } else if(k==="sleep"){ o.sleep=v>24?v/60:v; n++; } else if(k==="weight"){ o.weight=v; n++; }
+    else if(k==="water"){ o.water=v>20?v/1000:v; n++; } else if(k==="workout"||k==="workouts"||k==="exercise"){ o.workout=v; n++; } }
+  if(o.kcal!=null){ if(o.kcal>4500) o.kcal=o.kcal/4.184; o.kcal=Math.round(o.kcal); }
+  return n?o:null;
+}
+function applySync(txt){
+  const o=parseSync(txt);
+  if(!o){ modal({ico:"📋",title:"Nothing to sync",text:"Run your Sync Lock-In shortcut first, then tap Sync again.",ok:"OK"}); return false; }
+  const k=o.date||todayKey;
+  if(k>todayKey){ toast("That data is dated in the future"); return false; }
+  const d=day(k), hs=habitsFor(k), out=[]; let ticked=0;
+  AUTO.forEach(r=>{ const v=o[r.m]; if(v==null) return; const h=hs.find(x=>x.id===r.id); if(!h) return;
+    if(r.max!=null){ if(v<=0) return; const ok=v<=r.max; if(ok&&!d.c[h.id]) ticked++; d.c[h.id]=ok; out.push((ok?"✅ ":"❌ ")+h.name); }
+    else { const ok=v>=r.min; if(ok&&!d.c[h.id]){ d.c[h.id]=true; ticked++; } out.push((ok?"✅ ":"⏳ ")+h.name); } });
+  if(o.weight>=30&&o.weight<=250){ d.w=o.weight.toFixed(1); out.push("⚖️ "+d.w+" kg"); }
+  d.sync={steps:o.steps,kcal:o.kcal,protein:o.protein,sleep:o.sleep,t:Date.now()}; d.t=Date.now();
+  sel=k; changed(true);
+  if(ticked){ beep([660,880],0.12); buzz(20); }
+  mq.unshift({ico:"⟳",kick:"Synced "+fmt(k),title:ticked?ticked+" habit"+(ticked>1?"s":"")+" ticked":"Up to date",text:out.join("  ·  ")||"No matching habits for that day.",ok:"Done"});
+  if(!mOpen) nextModal();
+  return true;
+}
+async function syncClip(){ let t=""; try{ t=await navigator.clipboard.readText(); }catch(e){ modal({ico:"📋",title:"Couldn't read the clipboard",text:"Go to More, paste the shortcut's text into the Apple Health sync box and tap Apply.",ok:"OK"}); return; } applySync(t); }
+$("syncBtn").addEventListener("click",syncClip);
+$("syncBtn2").addEventListener("click",syncClip);
+$("syncGo").addEventListener("click",()=>{ if(applySync($("syncTxt").value)) $("syncTxt").value=""; });
 
 /* photos */
 function shrink(file){ return new Promise((res,rej)=>{ const img=new Image(), url=URL.createObjectURL(file); img.onload=()=>{ try{ const m=1080, s=Math.min(1,m/Math.max(img.width,img.height)), c=document.createElement("canvas"); c.width=Math.round(img.width*s); c.height=Math.round(img.height*s); c.getContext("2d").drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(url); res(c.toDataURL("image/jpeg",0.82)); }catch(e){ rej(e); } }; img.onerror=rej; img.src=url; }); }
