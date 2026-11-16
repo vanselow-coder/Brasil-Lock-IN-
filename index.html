@@ -109,6 +109,28 @@ h3[style]::before{content:"";width:8px;height:8px;border-radius:50%;background:c
 .chk.comp{background:transparent;box-shadow:inset 0 0 0 1.5px var(--edge);padding-top:11px;padding-bottom:11px;font-size:15px}
 .chk.comp.on{box-shadow:none;background:linear-gradient(90deg,rgba(25,211,138,.3),rgba(25,211,138,.1))}
 .cdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.onb{position:fixed;inset:0;background:var(--night);z-index:21;display:none;overflow-y:auto}
+.onb.on{display:block}
+.onb-in{max-width:520px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 22px) 20px calc(env(safe-area-inset-bottom) + 120px)}
+.onb h1{font-family:var(--display);font-size:31px;font-weight:800;letter-spacing:-.025em;line-height:1.1;margin:28px 0 8px}
+.onb p{color:var(--mute);font-size:15.5px;line-height:1.45;margin:0 0 16px}
+.onb-nav{position:fixed;left:0;right:0;bottom:0;display:flex;gap:10px;max-width:520px;margin:0 auto;padding:26px 20px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(rgba(14,18,48,0),var(--night) 38%)}
+.onb-nav .btn{flex:1;padding:15px}
+.onb-nav #onbBack{flex:0 0 96px}
+.opt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--deep);border:0;box-shadow:inset 0 0 0 2px transparent;border-radius:18px;padding:15px 16px;color:var(--ink);font:inherit;font-size:16px;font-weight:700;margin-top:10px;cursor:pointer}
+.opt>i{font-style:normal;font-size:27px;flex:0 0 34px;text-align:center}
+.opt>span{flex:1;min-width:0}
+.opt small{display:block;color:var(--mute);font-weight:500;font-size:13px;margin-top:1px}
+.opt.on{box-shadow:inset 0 0 0 2.5px var(--palm);background:rgba(25,211,138,.13)}
+.opt .tk{flex:0 0 26px;height:26px;border-radius:50%;border:2.5px solid #5560B8}
+.opt.on .tk{background:var(--palm);border-color:var(--palm)}
+.opt .tg{flex:0 0 auto;font:inherit;font-size:12px;font-weight:800;border:0;border-radius:99px;padding:6px 10px;background:var(--deep2);color:var(--mute);cursor:pointer}
+.opt.on .tg{background:var(--palm);color:var(--night)}
+.opt.on .tg.c{background:var(--deep2);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--edge)}
+.onb .logo{width:84px;height:84px;border-radius:22px;display:block;margin-top:18px}
+.sumrow{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid rgba(162,168,220,.16);font-weight:700}
+.sumrow:first-of-type{border-top:0}
+.sumrow span{color:var(--mute);font-weight:500;text-align:right}
 /* inputs + buttons */
 label.f{display:block;font-size:13px;color:var(--mute);margin:14px 0 6px;font-weight:600}
 input,textarea,select{width:100%;min-width:0;background:var(--deep2);border:2px solid transparent;border-radius:14px;color:var(--ink);font:inherit;font-size:16px;padding:12px 13px}
@@ -185,6 +207,10 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--palm)}
 .asset b{font-size:27px}
 .asset small{display:block;font-size:11px;font-weight:700;color:#F2C230;margin-top:3px}
 .asset.off small{color:var(--mute)}
+.asset.repo{box-shadow:inset 0 0 0 1.5px rgba(255,93,115,.6)}
+.asset.repo b{opacity:.4;filter:grayscale(1)}
+.asset.repo small{color:var(--guava)}
+.pill.r{background:rgba(255,93,115,.16);color:var(--guava)}
 .tw-foot{padding:12px 18px 16px;margin:0}
 /* photos */
 .cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
@@ -223,6 +249,8 @@ nav button.on{color:var(--night);background:var(--palm)}
 <body>
 <canvas id="confetti"></canvas>
 <div class="toast" id="toast"></div>
+<div class="onb" id="onb"><div class="onb-in"><div class="bar"><i id="onbBar" style="width:0"></i></div><div id="onbBody"></div></div>
+  <div class="onb-nav"><button class="btn ghost" id="onbBack">Back</button><button class="btn" id="onbNext">Next</button></div></div>
 <div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
 
 <header class="hero-top"><div class="hero-in">
@@ -238,7 +266,7 @@ nav button.on{color:var(--night);background:var(--palm)}
     <div class="hs"><b id="hStreak">0</b><span>day streak</span></div>
     <div class="hs"><b id="hMult">x1</b><span>XP boost</span></div>
     <div class="hs"><b id="hWorth">$0</b><span>net worth</span></div>
-    <div class="hs" id="hRioBox"><b id="hRio">-</b><span>days to Rio</span></div>
+    <div class="hs" id="hRioBox"><b id="hRio">-</b><span id="hRioLbl">days to go</span></div>
   </div>
 </div></header>
 
@@ -259,7 +287,7 @@ nav button.on{color:var(--night);background:var(--palm)}
         <div class="dh-txt">
           <div class="sub" id="dayLabel"></div>
           <h2 id="wkName"></h2>
-          <span class="pill" id="dayPill"></span> <span class="pill y" id="dayXp"></span> <span class="pill" id="dayBonus"></span>
+          <span class="pill" id="dayPill"></span> <span class="pill y" id="dayXp"></span> <span class="pill" id="dayBonus"></span> <span class="pill r" id="dayStake"></span>
         </div>
       </div>
       <div id="checks"></div>
@@ -277,7 +305,7 @@ nav button.on{color:var(--night);background:var(--palm)}
       <div class="sub" id="dayTip" style="margin-top:10px"></div>
     </div>
 
-    <div class="card">
+    <div class="card" id="sessCard">
       <h2>Today's session</h2>
       <div id="wkList"></div>
     </div>
@@ -325,7 +353,7 @@ nav button.on{color:var(--night);background:var(--palm)}
     <div class="card bank">
       <div class="sub">Net worth</div>
       <div class="nw" id="nwVal">$0</div>
-      <div class="row" style="gap:8px;flex-wrap:wrap"><span class="pill g" id="nwToday"></span><span class="pill" id="nwTitle"></span></div>
+      <div class="row" style="gap:8px;flex-wrap:wrap"><span class="pill g" id="nwToday"></span><span class="pill" id="nwTitle"></span><span class="pill r" id="nwLost"></span></div>
       <div id="nwChart"></div>
       <div class="nwnext">
         <div class="row between"><b id="nwNextName"></b><span class="sub" id="nwNextLeft"></span></div>
@@ -337,6 +365,17 @@ nav button.on{color:var(--night);background:var(--palm)}
       <div class="row between"><h2 style="margin:0">Portfolio</h2><span class="sub" id="pfCount"></span></div>
       <div class="sub" style="margin:4px 0 12px">Assets are added automatically as your net worth grows.</div>
       <div class="badges" id="portfolio"></div>
+    </div>
+
+    <div class="card">
+      <h2>House rules</h2>
+      <div class="ex"><div>Every XP you earn<small>Ticks, perfect days and boss wins</small></div><span style="color:var(--green);font-weight:800">+$1K</span></div>
+      <div class="ex"><div>Each essential left unticked<small>Charged at midnight</small></div><span style="color:var(--red);font-weight:800" id="hrFine">−$20K</span></div>
+      <div class="ex"><div>A day with nothing ticked<small>On top of the missed essentials</small></div><span style="color:var(--red);font-weight:800" id="hrCrash">−$100K</span></div>
+      <div class="ex"><div>Failing the weekly boss<small>Charged on Sunday night</small></div><span style="color:var(--red);font-weight:800" id="hrBoss">−$150K</span></div>
+      <div class="ex"><div>Falling below an asset's price<small>It's repossessed until you earn it back</small></div><span>Repo</span></div>
+      <div class="sub" style="margin-top:10px" id="hrMode"></div>
+      <div class="sub" style="margin-top:6px">Net worth can't go below $0. Complementary habits never cost you anything. Your XP and level are never reduced.</div>
     </div>
 
     <div class="card hero">
@@ -440,11 +479,19 @@ nav button.on{color:var(--night);background:var(--palm)}
     </div>
 
     <div class="card">
+      <h2>Your setup</h2>
+      <div class="sub" id="pfLine"></div>
+      <label class="f">Stakes</label>
+      <select id="stakesSel"><option value="0">Casual · no fines</option><option value="1">Standard · normal fines</option><option value="2">Hardcore · double fines</option></select>
+      <button class="btn ghost" id="redoBtn" style="width:100%;margin-top:12px">Redo the setup questions</button>
+    </div>
+
+    <div class="card">
       <h2>Backup</h2>
       <div class="sub" style="margin-bottom:10px">Your data and photos live on this phone only. Export a backup now and then.</div>
       <div class="row"><button class="btn" id="expBtn" style="flex:1">Export backup</button><label class="btn ghost" style="flex:1;text-align:center">Import<input id="impIn" type="file" accept="application/json,.json" style="display:none"></label></div>
     </div>
-    <div class="saved">Lockd v16</div>
+    <div class="saved">Lockd v18</div>
   </section>
 </div>
 
@@ -532,10 +579,10 @@ const BADGES=[
   {id:"boss3",i:"👑",n:"Boss Hunter",d:"Beat 3 weekly bosses",t:g=>g.bossN>=3},
   {id:"l5",i:"🚀",n:"Level 5",d:"Reach level 5",t:g=>g.level>=5},
   {id:"l10",i:"🏆",n:"Level 10",d:"Reach level 10",t:g=>g.level>=10},
-  {id:"rio",i:"🌴",n:"Rio Ready",d:"15 locked-in days before the flight",t:g=>g.cutLocked>=15},
+  {id:"rio",i:"🌴",n:"Rio Ready",d:"15 locked-in days before your deadline",t:g=>g.cutLocked>=15},
   {id:"photo",i:"📸",n:"Snapshot",d:"Add your first progress photo",t:g=>g.photoN>=1},
   {id:"multi",i:"🧠",n:"Renaissance",d:"Earn XP in 3 life areas",t:g=>Object.values(g.cat).filter(v=>v>0).length>=3},
-  {id:"mill",i:"💵",n:"Millionaire",d:"Reach a net worth of $1M",t:g=>g.xp>=1000},
+  {id:"mill",i:"💵",n:"Millionaire",d:"Reach a net worth of $1M",t:g=>g.worth>=1000},
   {id:"x5k",i:"💰",n:"5K Club",d:"Earn 5,000 XP",t:g=>g.xp>=5000}
 ];
 
@@ -543,6 +590,7 @@ const TIMES=[["am","Morning"],["mid","Midday"],["pm","Night"],["any","Anytime"]]
 const SEEDTT={sleep:["am","e"],trained:["am","e"],stairs:["am","c"],fasted:["mid","e"],kcal:["pm","e"],protein:["pm","e"],steps:["pm","e"],noalc:["pm","e"],t_sleep:["am","e"],t_move:["any","e"],t_protein:["pm","e"],t_steps:["pm","e"],t_water:["pm","e"]};
 function nowSlot(){ const h=new Date().getHours(); return h<12?"am":h<17?"mid":"pm"; }
 const isEss=h=>h.tier!=="c";
+const FINE=20, CRASH=100, BOSSFAIL=150;
 const DEF={steps:[15000,"steps a day"],t_steps:[10000,"steps a day"],kcal:[1900,"kcal a day"],protein:[160,"grams a day"],sleep:[7.5,"hours"],t_sleep:[7,"hours"],t_water:[3,"litres"]};
 function tgt(h){ const d=DEF[h.id]; if(!d) return null; return (h.target>0)?+h.target:d[0]; }
 function tgtOf(id){ const h=state.habits.find(x=>x.id===id); return h?tgt(h):(DEF[id]?DEF[id][0]:null); }
@@ -565,11 +613,16 @@ let state={v:2,goal:72,days:{}}, G=null, photos=[], cmpA=null, cmpB=null;
 
 /* ================= storage ================= */
 let saveTimer=null;
-function load(){ try{ const l=JSON.parse(localStorage.getItem("brazil-lockin")||"null"); if(l&&l.days) state=l; }catch(e){} migrate(); }
-function migrate(){
+function load(){ let fresh=true; try{ const l=JSON.parse(localStorage.getItem("brazil-lockin")||"null"); if(l&&l.days){ state=l; fresh=false; } }catch(e){} migrate(fresh); }
+function migrate(fresh){
+  if(state.onboarded===undefined){ state.onboarded=!fresh;
+    if(fresh){ state.habits=[]; state.event=null; state.plan=null; state.startKey=todayKey; state.travel={on:false,from:"",to:""}; state.name=""; }
+    else { if(state.event===undefined) state.event={name:"Rio",date:FLIGHTKEY}; if(state.plan===undefined) state.plan="kinobody"; if(!state.startKey) state.startKey=STARTKEY; } }
+  if(state.stakes===undefined) state.stakes=1;
   state.v=2; if(!state.days) state.days={}; if(!(state.goal>0)) state.goal=72;
   if(!Array.isArray(state.habits)) state.habits=SEED.map(h=>Object.assign({from:STARTKEY},h));
   state.habits.forEach(h=>{ const d=SEEDTT[h.id]; if(!h.time) h.time=d?d[0]:"any"; if(!h.tier) h.tier=d?d[1]:"e"; });
+  if(!state.penFrom) state.penFrom=todayKey;
   if(!state.travel) state.travel={on:true,from:FLIGHTKEY,to:"2027-01-05"};
   if(!Array.isArray(state.rewards)) state.rewards=REWARDS.map(r=>Object.assign({},r));
   if(!Array.isArray(state.spent)) state.spent=[];
@@ -592,7 +645,7 @@ const PDB={db:null,
 /* ================= engine ================= */
 function isTravel(k){ const t=state.travel; return !!(t&&t.on&&t.from&&t.to&&k>=t.from&&k<=t.to); }
 function habitsFor(k){ const m=isTravel(k)?"travel":"normal"; return state.habits.filter(h=>h.from<=k&&(!h.to||k<=h.to)&&(h.mode==="both"||h.mode===m)); }
-function firstKey(){ let f=STARTKEY<todayKey?STARTKEY:todayKey; for(const k in state.days){ if(k<f) f=k; } return f; }
+function firstKey(){ let f=state.startKey||STARTKEY; if(f>todayKey) f=todayKey; for(const k in state.days){ if(k<f) f=k; } return f; }
 function wOf(k){ const r=state.days[k]; const w=r&&parseFloat(r.w); return (w>=30&&w<=250)?w:null; }
 function trendAt(k){ let s=0,n=0; for(let i=0;i<7;i++){ const w=wOf(addK(k,-i)); if(w){s+=w;n++;} } return n?s/n:null; }
 function need(L){ return 150*(L-1)*L/2; }
@@ -602,7 +655,7 @@ function multOf(s){ return s>=14?2:s>=7?1.5:1; }
 function bossFor(m){ let tv=0; for(let i=0;i<7;i++) if(isTravel(addK(m,i))) tv++; if(tv>=4) return TBOSS; const n=Math.round(diffK(m,weekStart(STARTKEY))/7); return BOSSES[((n%4)+4)%4]; }
 
 function compute(){
-  const info={}, cat={Body:0,Mind:0,Money:0,Work:0}, first=firstKey();
+  const info={}, cat={Body:0,Mind:0,Money:0,Work:0}, first=firstKey(), penFrom=state.penFrom||todayKey, evDate=state.event&&state.event.date, SM=+state.stakes||0;
   let lockedN=0,streak=0,best=0,xp=0,perfectN=0,perfRun=0,bestPerf=0,noalc=0,cutLocked=0,weighN=0,firstW=null;
   for(let k=first;k<=todayKey;k=addK(k,1)){
     const hs=habitsFor(k), rec=state.days[k], c=(rec&&rec.c)||{}, mult=multOf(streak);
@@ -611,12 +664,13 @@ function compute(){
     const pct=es.length?done/es.length:0, perfect=es.length>0&&done===es.length, locked=es.length>0&&pct>=0.75;
     const dx=Math.round(base*mult)+(perfect?Math.round(50*mult):0);
     xp+=dx;
-    if(locked){ streak++; lockedN++; if(k<=CUT_END) cutLocked++; } else if(k!==todayKey) streak=0;
+    if(locked){ streak++; lockedN++; if(evDate&&k<evDate) cutLocked++; } else if(k!==todayKey) streak=0;
     if(perfect){ perfectN++; perfRun++; } else if(k!==todayKey) perfRun=0;
     if(streak>best) best=streak; if(perfRun>bestPerf) bestPerf=perfRun;
     if(c.noalc) noalc++;
     const w=wOf(k); if(w){ weighN++; if(firstW==null) firstW=w; }
-    info[k]={done,total:es.length,bonus,bonusTotal,pct,perfect,locked,xp:dx,mult};
+    const miss=es.length-done, zero=done===0&&bonus===0, fine=(k<todayKey&&k>=penFrom&&es.length)?(miss*FINE+(zero?CRASH:0))*SM:0;
+    info[k]={done,total:es.length,bonus,bonusTotal,pct,perfect,locked,xp:dx,mult,fine,miss,zero};
   }
   const weeks=[]; let bossXp=0,bossN=0;
   for(let m=weekStart(first);m<=todayKey;m=addK(m,7)){
@@ -626,9 +680,12 @@ function compute(){
     weeks.push({m,b,prog,done});
   }
   xp+=bossXp;
+  const bossAt={}, failAt={}; weeks.forEach(w=>{ const e=addK(w.m,6); if(w.done){ const k=e>todayKey?todayKey:e; bossAt[k]=(bossAt[k]||0)+w.b.xp; } else if(e<todayKey&&w.m>=penFrom){ w.failed=true; if(SM) failAt[e]=BOSSFAIL*SM; } });
+  let worth=0, lostTotal=0; const series=[];
+  for(let k=first;k<=todayKey;k=addK(k,1)){ const i=info[k], before=worth+i.xp+(bossAt[k]||0); worth=Math.max(0,before-(i.fine||0)-(failAt[k]||0)); lostTotal+=before-worth; series.push(worth); }
   const level=levelOf(xp), trend=trendAt(todayKey);
   const spent=state.spent.reduce((a,s)=>a+(+s.cost||0),0);
-  const g={assetN:assetCount(xp),lockedN,info,cat,streak,best,xp,perfectN,bestPerf,noalc,cutLocked,weighN,firstW,weeks,bossN,level,trend,goal:+state.goal||72,
+  const g={worth,lostTotal,series,failAt,assetN:assetCount(worth),lockedN,info,cat,streak,best,xp,perfectN,bestPerf,noalc,cutLocked,weighN,firstW,weeks,bossN,level,trend,goal:+state.goal||72,
     lost:(trend!=null&&firstW!=null)?firstW-trend:0, coins:xp-spent, spentN:state.spent.length, photoN:photos.length,
     mult:multOf(streak)};
   g.badges=BADGES.filter(b=>{ try{return b.t(g);}catch(e){return false;} }).map(b=>b.id);
@@ -637,8 +694,9 @@ function compute(){
 function infoOf(k){ if(G.info[k]) return G.info[k]; const hs=habitsFor(k), ne=hs.filter(isEss).length||hs.length; return {done:0,total:ne,bonus:0,bonusTotal:hs.length-ne,pct:0,perfect:false,locked:false,xp:0,mult:1}; }
 function tier(i){ return !i||i.done===0?"":i.pct>=0.75?"s3":i.pct>=0.5?"s2":"s1"; }
 function workoutFor(k){
+  if(state.plan!=="kinobody") return null;
   if(isTravel(k)) return WK.T;
-  if(k>=STARTKEY&&k<=CUT_END) return WK[CUT_SCHED[diffK(k,STARTKEY)]];
+  if(state.startKey===STARTKEY&&k>=STARTKEY&&k<=CUT_END) return WK[CUT_SCHED[diffK(k,STARTKEY)]];
   const dw=parse(k).getDay(); if(dw===6) return WK.R; if(dw===0) return WK.S;
   let n=0; const d0=diffK(k,STARTKEY); const weeks=Math.floor(d0/7); n=weeks*5+Math.min(((d0%7)+7)%7,5);
   return WK[["A","B","C"][((n%3)+3)%3]];
@@ -680,10 +738,11 @@ function recompute(celebrate){
   if(celebrate){
     if(G.level>prevLevel) modal({ico:"⬆️",kick:"Level up",title:"Level "+G.level,text:"Rank: "+rankOf(G.level)+". Keep stacking days.",party:200});
     for(let i=(state.lastAsset||0);i<G.assetN;i++){ const a=ASSETS[i], nx=ASSETS[i+1]; modal({ico:a[1],kick:"Added to your portfolio",title:a[0],text:"Net worth passed "+money(a[2]*1000)+"."+(nx?" Next: "+nx[0]+" at "+money(nx[2]*1000)+".":""),party:a[2]>=1000?220:130,ok:"Keep stacking"}); }
+    for(let i=G.assetN;i<(state.lastAsset||0);i++){ const a=ASSETS[i]; modal({ico:"📉",kick:"Repossessed",title:a[0],text:"Your net worth fell below "+money(a[2]*1000)+". Earn it back to reclaim it.",ok:"I'll fix it"}); }
     G.badges.forEach(id=>{ if(state.seenBadges.indexOf(id)<0){ const b=BADGES.find(x=>x.id===id); modal({ico:b.i,kick:"Badge unlocked",title:b.n,text:b.d,party:120,ok:"Nice"}); } });
     G.weeks.forEach(w=>{ if(w.done&&!state.seenBoss[w.m]) modal({ico:"⚔️",kick:"Boss defeated",title:w.b.n,text:"+"+w.b.xp+" XP bonus. A new boss arrives Monday.",party:220}); });
   }
-  state.lastLevel=G.level; state.lastAsset=G.assetN;
+  state.lastLevel=G.level; state.lastAsset=G.assetN; state.peakAsset=Math.max(state.peakAsset||0,G.assetN);
   G.badges.forEach(id=>{ if(state.seenBadges.indexOf(id)<0) state.seenBadges.push(id); });
   G.weeks.forEach(w=>{ if(w.done) state.seenBoss[w.m]=1; });
 }
@@ -693,8 +752,8 @@ function renderHeader(){
   const L=G.level, a=need(L), b=need(L+1), p=Math.max(0,Math.min(1,(G.xp-a)/(b-a)));
   $("hLvl").textContent=L; $("hRank").textContent=rankOf(L);
   $("hXp").textContent=num(G.xp-a)+" / "+num(b-a)+" XP"; $("hBar").style.width=(p*100)+"%";
-  $("hStreak").textContent=G.streak; $("hMult").textContent="x"+G.mult; $("hWorth").textContent=money(G.xp*1000);
-  const left=diffK(FLIGHTKEY,todayKey); $("hRioBox").style.display=left>0?"":"none"; $("hRio").textContent=left;
+  $("hStreak").textContent=G.streak; $("hMult").textContent="x"+G.mult; $("hWorth").textContent=money(G.worth*1000);
+  const ev=state.event, left=ev&&ev.date?diffK(ev.date,todayKey):0; $("hRioBox").style.display=left>0?"":"none"; $("hRio").textContent=left; $("hRioLbl").textContent="days to "+(ev&&ev.name?ev.name:"go");
 }
 function renderStrip(){
   const first=firstKey(); let a=addK(todayKey,-35); if(a<first) a=first; if(sel<a) a=sel;
@@ -707,11 +766,11 @@ function chkHtml(h,on){ return `<button class="chk ${on?"on":""} ${isEss(h)?"":"
 function renderToday(){
   const d=parse(sel), w=workoutFor(sel), rec=state.days[sel]||{c:{}}, c=rec.c||{}, hs=habitsFor(sel), tv=isTravel(sel);
   $("dayLabel").textContent=DOW[d.getDay()]+" "+d.getDate()+" "+MON[d.getMonth()]+(sel===todayKey?" · Today":"");
-  $("wkName").textContent=w.name;
+  $("wkName").textContent=w?w.name:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][d.getDay()]; $("sessCard").style.display=w?"":"none";
   const pill=$("dayPill");
   if(tv){ pill.textContent="Travel mode"; pill.className="pill b"; }
-  else if(sel>=STARTKEY&&sel<=CUT_END){ pill.textContent="Cut day "+(diffK(sel,STARTKEY)+1)+" of 19"; pill.className="pill"; }
-  else { pill.textContent="Lock-in"; pill.className="pill"; }
+  else { const sk0=state.startKey||STARTKEY, ev=state.event; pill.className="pill";
+    pill.textContent=sel<sk0?"Before you started":(ev&&ev.date&&sel<ev.date&&ev.date>sk0)?"Day "+(diffK(sel,sk0)+1)+" of "+diffK(ev.date,sk0):"Day "+(diffK(sel,sk0)+1); }
   let h=""; const slot=sel===todayKey?nowSlot():null;
   TIMES.forEach(t=>{ const l=hs.filter(x=>(x.time||"any")===t[0]); if(!l.length) return; const e=l.filter(isEss), cm=l.filter(x=>!isEss(x)), dn=l.filter(x=>c[x.id]).length;
     h+=`<h3 class="tsec"><span>${t[1]}${slot===t[0]?' <i class="now">Now</i>':""}</span><em>${dn}/${l.length}</em></h3><div class="checks">`+e.map(x=>chkHtml(x,c[x.id])).join("")+`</div>`;
@@ -721,8 +780,8 @@ function renderToday(){
   $("weight").value=rec.w||""; $("topset").value=rec.ts||""; $("notes").value=rec.n||"";
   const sy=rec.sync, sl=$("syncLine");
   if(sy){ const b=[]; if(sy.steps!=null) b.push(num(sy.steps)+" steps"); if(sy.kcal!=null) b.push(num(sy.kcal)+" kcal"); if(sy.protein!=null) b.push(Math.round(sy.protein)+"g protein"); if(sy.sleep!=null) b.push(sy.sleep.toFixed(1)+"h sleep"); sl.textContent="Synced: "+b.join(" · "); sl.style.display=b.length?"block":"none"; } else sl.style.display="none";
-  $("dayTip").textContent=TIPS[sel]||""; $("dayTip").style.display=TIPS[sel]?"block":"none";
-  $("wkList").innerHTML=w.ex.map(e=>`<div class="ex"><div>${esc(e[0])}${e[2]?`<small>${esc(e[2])}</small>`:""}</div><span>${esc(e[1])}</span></div>`).join("");
+  const tip=(state.plan==="kinobody"&&state.startKey===STARTKEY)?TIPS[sel]:""; $("dayTip").textContent=tip||""; $("dayTip").style.display=tip?"block":"none";
+  $("wkList").innerHTML=!w?"":w.ex.map(e=>`<div class="ex"><div>${esc(e[0])}${e[2]?`<small>${esc(e[2])}</small>`:""}</div><span>${esc(e[1])}</span></div>`).join("");
   const lastM=addK(weekStart(todayKey),-7);
   $("reviewBanner").innerHTML=(parse(todayKey).getDay()===1&&sel===todayKey&&lastM>=weekStart(firstKey()))?`<div class="banner"><span>📊 Last week's review is ready</span><button class="btn sm" id="rvOpen">View</button></div>`:"";
   renderScore();
@@ -732,6 +791,10 @@ function renderScore(){
   $("scoreTxt").textContent=i.done+"/"+i.total;
   $("ringArc").style.strokeDashoffset=251.3*(1-i.pct);
   $("ringArc").setAttribute("stroke",i.perfect?"#19D38A":"url(#sun)");
+  const sk=$("dayStake"), pf=state.penFrom||todayKey;
+  if(sel===todayKey&&sel>=pf&&i.total&&(+state.stakes||0)>0){ const m=i.total-i.done, z=i.done===0&&i.bonus===0; sk.textContent=m>0?"−"+money((m*FINE+(z?CRASH:0))*(+state.stakes||0)*1000)+" at midnight":"Nothing at stake"; sk.className="pill "+(m>0?"r":"g"); sk.style.display=""; }
+  else if(sel<todayKey&&i.fine>0){ sk.textContent="Fined −"+money(i.fine*1000); sk.className="pill r"; sk.style.display=""; }
+  else sk.style.display="none";
   $("dayBonus").textContent=i.bonus+"/"+i.bonusTotal+" extra"; $("dayBonus").style.display=i.bonusTotal?"":"none";
   $("dayXp").textContent="+"+i.xp+" XP"+(i.mult>1?" · x"+i.mult:""); $("dayXp").style.display=sel>todayKey?"none":"";
 }
@@ -820,19 +883,20 @@ const WEALTH=[[0,"Starting out"],[100,"Saver"],[500,"Investor"],[1000,"Millionai
 function assetCount(xp){ return ASSETS.filter(a=>xp>=a[2]).length; }
 function money(v){ v=Math.max(0,v); if(v>=1e7) return "$"+(v/1e6).toFixed(1).replace(/\.0$/,"")+"M"; if(v>=1e6) return "$"+(v/1e6).toFixed(2).replace(/\.?0+$/,"")+"M"; if(v>=1000) return "$"+Math.round(v/1000)+"K"; return "$"+Math.round(v); }
 let nwAnim=null;
-function countUp(){ const el=$("nwVal"), target=G.xp*1000; cancelAnimationFrame(nwAnim);
+function countUp(){ const el=$("nwVal"), target=G.worth*1000; cancelAnimationFrame(nwAnim);
   let still=false; try{ still=window.matchMedia("(prefers-reduced-motion:reduce)").matches; }catch(e){}
   if(still||target<=0){ el.textContent=money(target); return; }
   const t0=performance.now(), dur=900; (function step(t){ const p=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-p,3); el.textContent=money(target*e); if(p<1) nwAnim=requestAnimationFrame(step); })(t0); }
 function renderBank(){
-  const xp=G.xp, tx=(G.info[todayKey]||{}).xp||0;
+  const xp=G.worth, tx=(G.info[todayKey]||{}).xp||0;
   if(!$("v-game").classList.contains("on")) $("nwVal").textContent=money(xp*1000);
   $("nwToday").textContent="+"+money(tx*1000)+" banked today"; $("nwToday").style.display=tx>0?"":"none";
   let title=WEALTH[0][1]; WEALTH.forEach(w=>{ if(xp>=w[0]) title=w[1]; }); $("nwTitle").textContent=title;
-  // growth chart: cumulative by day, weekly boss bonus lands on the week's last elapsed day
-  const bossAt={}; G.weeks.forEach(w=>{ if(w.done){ let k=addK(w.m,6); if(k>todayKey) k=todayKey; bossAt[k]=(bossAt[k]||0)+w.b.xp; } });
-  const pts=[]; let cum=0; for(let k=firstKey();k<=todayKey;k=addK(k,1)){ cum+=((G.info[k]||{}).xp||0)+(bossAt[k]||0); pts.push(cum); }
-  const W=320,H=120,pl=4,pr=4,pt=10,pb=8, mx=Math.max(pts[pts.length-1],1), n=pts.length;
+  const sm=+state.stakes||0; $("hrFine").textContent=sm?"−"+money(FINE*sm*1000):"Off"; $("hrCrash").textContent=sm?"−"+money(CRASH*sm*1000):"Off"; $("hrBoss").textContent=sm?"−"+money(BOSSFAIL*sm*1000):"Off";
+  $("hrMode").textContent=sm===0?"You're playing Casual: no fines. Change it in More.":sm===2?"You're playing Hardcore: double fines.":"You're playing Standard stakes.";
+  $("nwLost").textContent="−"+money(G.lostTotal*1000)+" lost to fines"; $("nwLost").style.display=G.lostTotal>0?"":"none";
+  const pts=G.series;
+  const W=320,H=120,pl=4,pr=4,pt=10,pb=8, mx=Math.max.apply(null,pts.concat([1])), n=pts.length;
   const X=i=>n>1?pl+(W-pl-pr)*i/(n-1):W/2, Y=v=>pt+(H-pt-pb)*(1-v/mx);
   let o=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;margin-top:14px" role="img" aria-label="Net worth over time"><line x1="0" x2="${W}" y1="${H-pb}" y2="${H-pb}" stroke="#2F3879"/>`;
   if(n>1){ const line=pts.map((v,i)=>(i?"L":"M")+X(i).toFixed(1)+" "+Y(v).toFixed(1)).join(" ");
@@ -843,7 +907,7 @@ function renderBank(){
   if(nx){ $("nwNextName").textContent="Next: "+nx[1]+" "+nx[0]; $("nwNextLeft").textContent=money((nx[2]-xp)*1000)+" to go"; $("nwBar").style.width=Math.max(2,Math.min(100,(xp-pv)/(nx[2]-pv)*100))+"%"; }
   else { $("nwNextName").textContent="Portfolio complete"; $("nwNextLeft").textContent=""; $("nwBar").style.width="100%"; }
   $("pfCount").textContent=G.assetN+" of "+ASSETS.length;
-  $("portfolio").innerHTML=ASSETS.map((a,i)=>`<div class="bdg asset ${i<G.assetN?"":"off"}"><b>${a[1]}</b><span>${esc(a[0])}</span><small>${money(a[2]*1000)}</small></div>`).join("");
+  $("portfolio").innerHTML=ASSETS.map((a,i)=>{ const own=i<G.assetN, repo=!own&&i<(state.peakAsset||0); return `<div class="bdg asset ${own?"":repo?"repo":"off"}"><b>${a[1]}</b><span>${esc(a[0])}</span><small>${repo?"Repossessed":money(a[2]*1000)}</small></div>`; }).join("");
 }
 function renderRadar(){
   const cs=Object.keys(CATS), vals=cs.map(c=>G.cat[c]||0), mx=Math.max.apply(null,vals.concat([1])), W=300,H=230,cx=150,cy=115,R=74;
@@ -872,6 +936,9 @@ function renderMore(){
   const act=state.habits.filter(h=>!h.to||h.to>=todayKey); let h="";
   TIMES.forEach(t=>{ const l=act.filter(x=>(x.time||"any")===t[0]); if(!l.length) return; h+=`<h3>${t[1]}</h3>`+l.map((x,i)=>`<div class="ex"><div style="min-width:0"><i class="cdot" style="background:${CATS[x.cat]||"#fff"}"></i>${esc(x.name)}<small>${isEss(x)?"Essential":"Complementary"} · ${x.cat} · +${x.xp} XP${x.mode==="travel"?" · travel days":x.mode==="both"?" · every day":""}${DEF[x.id]?" · target "+(tgt(x)>=1000?num(tgt(x)):tgt(x)):""}</small></div><div class="hbtns"><button class="x" data-hup="${esc(x.id)}" ${i===0?"disabled":""} aria-label="Move up">↑</button><button class="x" data-hdn="${esc(x.id)}" ${i===l.length-1?"disabled":""} aria-label="Move down">↓</button><button class="x" data-hed="${esc(x.id)}" aria-label="Edit">✎</button><button class="x" data-hdel="${esc(x.id)}" aria-label="Remove">×</button></div></div>`).join(""); });
   $("habitList").innerHTML=h; renderTargets();
+  $("stakesSel").value=String(+state.stakes||0); const ev=state.event;
+  $("pfLine").textContent=(state.name?state.name+". ":"")+(ev&&ev.date?(ev.name||"Deadline")+" on "+fmt(ev.date)+". ":"No deadline set. ")+(state.plan==="kinobody"?"Gym plan on.":"");
+  document.querySelector('nav [data-v="plan"]').style.display=state.plan==="kinobody"?"":"none";
   $("tvSw").classList.toggle("on",!!state.travel.on); $("tvFrom").value=state.travel.from||""; $("tvTo").value=state.travel.to||"";
   $("sndSw").classList.toggle("on",!!state.sound); $("goalIn").value=state.goal;
 }
@@ -989,17 +1056,121 @@ $("photos").addEventListener("click",e=>{ if(!e.target.closest("#phDel")) return
 /* backup */
 $("expBtn").addEventListener("click",()=>{ try{ const out=Object.assign({},state,{photos:photos}); const b=new Blob([JSON.stringify(out)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download="lockd-backup-"+todayKey+".json"; document.body.appendChild(a); a.click(); a.remove(); }catch(e){ toast("Export failed"); } });
 $("impIn").addEventListener("change",async e=>{ const f=e.target.files[0]; e.target.value=""; if(!f) return;
-  try{ const d=JSON.parse(await f.text()); if(!d||!d.days) throw 0; const ph=Array.isArray(d.photos)?d.photos:[]; delete d.photos; state=d; migrate();
+  try{ const d=JSON.parse(await f.text()); if(!d||!d.days) throw 0; const ph=Array.isArray(d.photos)?d.photos:[]; delete d.photos; state=d; migrate(false);
     if(PDB.db){ for(const p of ph){ if(p&&p.k&&typeof p.v==="string"&&p.v.indexOf("data:image/")===0) await PDB.put(p.k,p.v); } photos=(await PDB.all()).sort((a,b)=>a.k<b.k?-1:1); }
     saveNow(); recompute(false); renderAll(); toast("Backup restored"); }
   catch(err){ toast("That file isn't a Lockd backup"); } });
 
 /* ================= boot ================= */
-load(); recompute(false); renderPlan(); renderAll(); saveNow();
+/* ================= first-run questionnaire ================= */
+const GOALS=[["lean","🔥","Get lean","Drop body fat and look sharp"],["muscle","💪","Build muscle","Get bigger and stronger"],["fit","🏃","Get fitter","More energy and better health"],["disc","🎯","Build discipline","Lock in across your whole life"]];
+const AREAS=[["Body","🏋️","Training, food and sleep"],["Mind","🧠","Reading, focus and calm"],["Money","💰","Spending, saving and investing"],["Work","💼","Deep work and career"]];
+const CATALOG=[
+  {id:"trained",name:"Trained",sub:"Session done",cat:"Body",xp:10,time:"am",tier:"e",on:1},
+  {id:"sleep",name:"7.5h+ sleep",sub:"Last night",cat:"Body",xp:10,time:"am",tier:"e",on:1},
+  {id:"steps",name:"Steps target",sub:"Walk it in",cat:"Body",xp:10,time:"pm",tier:"e",num:"steps"},
+  {id:"kcal",name:"Calorie limit",sub:"Calories",cat:"Body",xp:10,time:"pm",tier:"e",num:"kcal"},
+  {id:"protein",name:"Protein target",sub:"Hit it",cat:"Body",xp:10,time:"pm",tier:"e",num:"protein"},
+  {id:"fasted",name:"Fasted to 12pm",sub:"Black coffee, water",cat:"Body",xp:10,time:"mid",tier:"e",goals:["lean"]},
+  {id:"noalc",name:"No alcohol",sub:"Zero",cat:"Body",xp:10,time:"pm",tier:"e",goals:["lean","disc"]},
+  {id:"stairs",name:"Cardio finisher",sub:"15 to 30 min",cat:"Body",xp:10,time:"am",tier:"c",goals:["lean","fit"]},
+  {id:"c_water",name:"3L water",sub:"",cat:"Body",xp:5,time:"pm",tier:"c",on:1},
+  {id:"c_mob",name:"10 min mobility",sub:"",cat:"Body",xp:5,time:"am",tier:"c"},
+  {id:"c_read",name:"Read 20 pages",sub:"",cat:"Mind",xp:10,time:"pm",tier:"e",on:1},
+  {id:"c_phone",name:"No phone for the first 30 min",sub:"",cat:"Mind",xp:10,time:"am",tier:"c",on:1},
+  {id:"c_med",name:"10 min meditation",sub:"",cat:"Mind",xp:10,time:"am",tier:"c"},
+  {id:"c_journal",name:"Journal three lines",sub:"",cat:"Mind",xp:5,time:"pm",tier:"c"},
+  {id:"c_study",name:"Study session",sub:"45 minutes",cat:"Mind",xp:20,time:"any",tier:"c"},
+  {id:"c_spend",name:"Log today's spending",sub:"",cat:"Money",xp:5,time:"pm",tier:"e",on:1},
+  {id:"c_impulse",name:"No impulse buys",sub:"",cat:"Money",xp:10,time:"pm",tier:"c",on:1},
+  {id:"c_invest",name:"15 min on investing",sub:"",cat:"Money",xp:10,time:"any",tier:"c"},
+  {id:"c_deep",name:"90 min deep work",sub:"Before email",cat:"Work",xp:20,time:"am",tier:"e",on:1},
+  {id:"c_top3",name:"Plan tomorrow's top 3",sub:"",cat:"Work",xp:5,time:"pm",tier:"e",on:1},
+  {id:"c_reach",name:"One outreach message",sub:"",cat:"Work",xp:10,time:"mid",tier:"c"},
+  {id:"c_side",name:"1 hour on your side project",sub:"",cat:"Work",xp:20,time:"pm",tier:"c"}
+];
+const OB={step:0,a:null,redo:false};
+function obSteps(){ const st=["hi","goal","areas","date"]; if(OB.a.areas.Body) st.push("body"); st.push("habits","stakes","sum"); return st; }
+function obName(c){ const a=OB.a; if(c.num==="steps") return variants(+a.steps||10000).pop()+" steps"; if(c.num==="kcal") return "Under "+num(+a.kcal); if(c.num==="protein") return (+a.protein)+"g+ protein"; return c.name; }
+function obAvail(c){ const a=OB.a; if(!a.areas[c.cat]) return false; if(c.num==="kcal") return +a.kcal>0; if(c.num==="protein") return +a.protein>0; return true; }
+function obDefaults(){ const a=OB.a; CATALOG.forEach(c=>{ if(a.touched[c.id]) return; const cur=OB.redo&&state.habits.find(h=>h.id===c.id&&(!h.to||h.to>=todayKey));
+    const on=OB.redo?!!cur:!!(c.on||c.num||(c.goals&&c.goals.indexOf(a.goal)>=0)); a.habits[c.id]={on:on,tier:cur?cur.tier:c.tier}; }); }
+function startOnboarding(redo){
+  const ev=state.event||{}, g=id=>{ const h=state.habits.find(x=>x.id===id&&(!x.to||x.to>=todayKey)); return h?tgt(h):""; };
+  OB.redo=!!redo; OB.step=0;
+  OB.a={name:state.name||"",goal:state.goalType||"lean",areas:{Body:true},evName:ev.name||"",evDate:ev.date||"",w:"",gw:redo?state.goal:"",kcal:redo?g("kcal"):"",protein:redo?g("protein"):"",steps:redo?(g("steps")||10000):10000,plan:state.plan==="kinobody",habits:{},touched:{},stakes:redo?(+state.stakes||0):1};
+  if(redo) Object.keys(CATS).forEach(c=>{ if(state.habits.some(h=>h.cat===c&&h.mode!=="travel"&&(!h.to||h.to>=todayKey))) OB.a.areas[c]=true; });
+  $("onb").classList.add("on"); obRender();
+}
+function obRender(){
+  const a=OB.a, st=obSteps(), id=st[OB.step]; let h="";
+  $("onbBar").style.width=((OB.step+1)/st.length*100)+"%";
+  $("onbBack").style.display=OB.step===0&&!OB.redo?"none":""; $("onbBack").textContent=OB.step===0?"Cancel":"Back"; $("onbNext").textContent=id==="sum"?(OB.redo?"Save changes":"Start the game"):"Next";
+  if(id==="hi") h=`<img class="logo" src="icon-192.png" alt=""><h1>Welcome to Lockd</h1><p>Tick your habits, bank your net worth, and don't get fined. A few quick questions set up your game.</p><label class="f">What should we call you?</label><input id="obNm" maxlength="24" placeholder="Your name" value="${esc(a.name)}">`;
+  if(id==="goal") h=`<h1>What's the main goal?</h1><p>This decides which habits we suggest.</p>`+GOALS.map(g=>`<button class="opt ${a.goal===g[0]?"on":""}" data-goal="${g[0]}"><i>${g[1]}</i><span>${g[2]}<small>${g[3]}</small></span><em class="tk"></em></button>`).join("");
+  if(id==="areas") h=`<h1>Which areas of life?</h1><p>Pick every area you want to level up. You can change this later.</p>`+AREAS.map(r=>`<button class="opt ${a.areas[r[0]]?"on":""}" data-area="${r[0]}"><i>${r[1]}</i><span>${r[0]}<small>${r[2]}</small></span><em class="tk"></em></button>`).join("");
+  if(id==="date") h=`<h1>Working towards a date?</h1><p>A trip, an event, a deadline. The app counts down to it. Leave it blank to skip.</p><label class="f">What is it?</label><input id="obEvN" maxlength="14" placeholder="e.g. Rio, wedding, race day" value="${esc(a.evName)}"><label class="f">When?</label><input id="obEvD" type="date" min="${addK(todayKey,1)}" value="${esc(a.evDate)}">`;
+  if(id==="body") h=`<h1>Your numbers</h1><p>Use your own targets. Leave any of them blank and that habit is skipped.</p>
+    <div class="row"><div style="flex:1"><label class="f" style="margin-top:0">Weight now (kg)</label><input id="obW" type="number" inputmode="decimal" step="0.1" value="${esc(a.w)}"></div><div style="flex:1"><label class="f" style="margin-top:0">Goal weight (kg)</label><input id="obGw" type="number" inputmode="decimal" step="0.1" value="${esc(a.gw)}"></div></div>
+    <div class="row"><div style="flex:1"><label class="f">Daily calorie limit</label><input id="obK" type="number" inputmode="numeric" placeholder="e.g. 2000" value="${esc(a.kcal)}"></div><div style="flex:1"><label class="f">Protein (g a day)</label><input id="obP" type="number" inputmode="numeric" placeholder="e.g. 150" value="${esc(a.protein)}"></div></div>
+    <label class="f">Daily steps</label><input id="obS" type="number" inputmode="numeric" value="${esc(a.steps)}">
+    <button class="opt ${a.plan?"on":""}" data-plan="1" style="margin-top:18px"><i>🏋️</i><span>Add the gym plan<small>Push, Pull, Legs rotation with sets and reps each day</small></span><em class="tk"></em></button>`;
+  if(id==="habits"){ obDefaults(); h=`<h1>Pick your habits</h1><p>Tap a habit to add it. Essential habits count toward your score, streak and fines. Bonus ones only add XP. Tap the tag to switch.</p>`;
+    Object.keys(CATS).filter(c=>a.areas[c]).forEach(c=>{ h+=`<h3 style="color:${CATS[c]}">${c}</h3>`+CATALOG.filter(x=>x.cat===c&&obAvail(x)).map(x=>{ const v=a.habits[x.id]; return `<div class="opt ${v.on?"on":""}" data-hb="${x.id}" role="button" tabindex="0"><em class="tk"></em><span>${esc(obName(x))}<small>${TIMES.find(t=>t[0]===x.time)[1]} · +${x.xp} XP</small></span><button class="tg ${v.tier==="c"?"c":""}" data-tg="${x.id}">${v.tier==="c"?"Bonus":"Essential"}</button></div>`; }).join(""); }); }
+  if(id==="stakes") h=`<h1>How hard do you want to play?</h1><p>Fines come out of your net worth at midnight for every essential you miss.</p>`+[[0,"🌴","Casual","No fines. Just build."],[1,"⚖️","Standard","$20K per missed essential, $100K for an empty day"],[2,"🔥","Hardcore","Double fines. Assets get repossessed fast."]].map(o=>`<button class="opt ${a.stakes===o[0]?"on":""}" data-stk="${o[0]}"><i>${o[1]}</i><span>${o[2]}<small>${o[3]}</small></span><em class="tk"></em></button>`).join("");
+  if(id==="sum"){ obDefaults(); const pick=CATALOG.filter(x=>obAvail(x)&&a.habits[x.id].on), e=pick.filter(x=>a.habits[x.id].tier!=="c").length;
+    h=`<h1>${a.name?esc(a.name)+", you're":"You're"} set</h1><p>${OB.redo?"Saving replaces your habit list with the one below. Your history, XP and net worth are kept.":"Here's your game. Everything can be changed later in More."}</p><div class="card" style="margin-top:0">`
+      +`<div class="sumrow">Goal<span>${GOALS.find(g=>g[0]===a.goal)[2]}</span></div><div class="sumrow">Habits<span>${e} essential, ${pick.length-e} bonus</span></div>`
+      +`<div class="sumrow">Deadline<span>${a.evDate?esc(a.evName||"Deadline")+" in "+diffK(a.evDate,todayKey)+" days":"None"}</span></div>`
+      +`<div class="sumrow">Stakes<span>${["Casual","Standard","Hardcore"][a.stakes]}</span></div>`+(a.areas.Body&&a.plan?`<div class="sumrow">Gym plan<span>Push, Pull, Legs</span></div>`:"")+`</div>`
+      +(pick.length?`<div class="card">`+pick.map(x=>`<div class="sumrow">${esc(obName(x))}<span>${a.habits[x.id].tier==="c"?"Bonus":"Essential"}</span></div>`).join("")+`</div>`:`<div class="banner"><span>No habits picked. Go back and add at least one.</span></div>`); }
+  $("onbBody").innerHTML=h; $("onb").scrollTop=0;
+}
+function obCollect(){ const a=OB.a, v=id=>{ const e=$(id); return e?e.value.trim():null; };
+  if(v("obNm")!==null) a.name=v("obNm").slice(0,24);
+  if(v("obEvN")!==null){ a.evName=v("obEvN").slice(0,14); a.evDate=v("obEvD")>todayKey?v("obEvD"):""; }
+  if(v("obW")!==null){ a.w=v("obW"); a.gw=v("obGw"); a.kcal=v("obK"); a.protein=v("obP"); a.steps=v("obS")||10000; } }
+function obFinish(){
+  const a=OB.a, pick=CATALOG.filter(x=>obAvail(x)&&a.habits[x.id].on);
+  if(!pick.length){ toast("Pick at least one habit"); return; }
+  const first=!state.onboarded, yest=addK(todayKey,-1);
+  if(first){ state.habits=[]; state.startKey=todayKey; state.penFrom=todayKey; }
+  else state.habits=state.habits.filter(h=>{ if(h.mode==="travel"||(h.to&&h.to<todayKey)) return true; if(pick.some(x=>x.id===h.id)) return true; if(h.from>=todayKey) return false; h.to=yest; return true; });
+  pick.forEach(x=>{ let h=state.habits.find(y=>y.id===x.id&&(!y.to||y.to>=todayKey));
+    if(!h){ h={id:x.id,name:x.name,sub:x.sub,cat:x.cat,xp:x.xp,mode:"normal",time:x.time,from:todayKey}; const old=state.habits.findIndex(y=>y.id===x.id); if(old>=0) state.habits.splice(old,1); state.habits.push(h); }
+    h.tier=a.habits[x.id].tier; if(x.num){ h.target=+a[x.num]; h.name=obName(x); } });
+  if(!state.habits.some(h=>h.mode==="travel")) SEED.filter(h=>h.mode==="travel").forEach(h=>{ const d=SEEDTT[h.id]; state.habits.push(Object.assign({from:todayKey,time:d[0],tier:d[1]},h)); });
+  state.name=a.name; state.goalType=a.goal; state.stakes=a.stakes; state.plan=(a.areas.Body&&a.plan)?"kinobody":null;
+  state.event=a.evDate?{name:a.evName||"deadline",date:a.evDate}:null;
+  if(+a.gw>0) state.goal=+a.gw; if(+a.w>=30&&+a.w<=250) day(todayKey).w=(+a.w).toFixed(1);
+  state.onboarded=true; $("onb").classList.remove("on"); sel=todayKey; show("today"); changed(false);
+  if(first){ confetti(180); beep([523,659,784,1047],0.15); toast("Game on"+(a.name?", "+a.name:"")); } else toast("Setup saved");
+}
+$("onbBody").addEventListener("click",e=>{ const a=OB.a, t=x=>e.target.closest(x);
+  if(t("[data-goal]")){ obCollect(); a.goal=t("[data-goal]").dataset.goal; if(!OB.redo){ if(a.goal==="disc"){ a.areas.Mind=true; a.areas.Work=true; } } obRender(); }
+  else if(t("[data-area]")){ const k=t("[data-area]").dataset.area; a.areas[k]=!a.areas[k]; if(!Object.keys(a.areas).some(x=>a.areas[x])) a.areas[k]=true; obRender(); }
+  else if(t("[data-plan]")){ obCollect(); a.plan=!a.plan; obRender(); }
+  else if(t("[data-tg]")){ const k=t("[data-tg]").dataset.tg; a.habits[k].tier=a.habits[k].tier==="c"?"e":"c"; a.habits[k].on=true; a.touched[k]=1; obRender(); }
+  else if(t("[data-hb]")){ const k=t("[data-hb]").dataset.hb; a.habits[k].on=!a.habits[k].on; a.touched[k]=1; obRender(); }
+  else if(t("[data-stk]")){ a.stakes=+t("[data-stk]").dataset.stk; obRender(); } });
+$("onbNext").addEventListener("click",()=>{ obCollect(); const st=obSteps(); if(st[OB.step]==="sum"){ obFinish(); return; } OB.step=Math.min(OB.step+1,obSteps().length-1); obRender(); });
+$("onbBack").addEventListener("click",()=>{ obCollect(); if(OB.step===0){ if(OB.redo) $("onb").classList.remove("on"); return; } OB.step--; obRender(); });
+$("redoBtn").addEventListener("click",()=>startOnboarding(true));
+$("stakesSel").addEventListener("change",()=>{ state.stakes=+$("stakesSel").value; changed(false); toast("Stakes updated"); });
+
+function statement(){
+  if(state.stmtDay===todayKey) return; const had=state.stmtDay; state.stmtDay=todayKey; saveNow();
+  const y=addK(todayKey,-1), i=G.info[y]; if(!had||!i||y<(state.penFrom||todayKey)) return;
+  const bf=G.failAt[y]||0, out=(i.fine||0)+bf, net=i.xp-out;
+  modal({ico:out>0?"🧾":"💰",kick:"Yesterday's statement",title:(net>=0?"+":"−")+money(Math.abs(net)*1000),text:"Banked "+money(i.xp*1000)+". "+(i.fine>0?"Fined "+money(i.fine*1000)+" for "+i.miss+" missed essential"+(i.miss===1?"":"s")+(i.zero?" and a zero day":"")+". ":"No fines. ")+(bf?"Lost "+money(bf*1000)+" for failing the weekly boss.":""),ok:out>0?"Do better today":"Keep stacking"});
+}
+function repoNotice(la){ for(let i=G.assetN;i<la;i++){ const a=ASSETS[i]; modal({ico:"📉",kick:"Repossessed",title:a[0],text:"Your net worth fell below "+money(a[2]*1000)+". Earn it back to reclaim it.",ok:"I will fix it"}); } }
+load(); const la0=state.lastAsset||0; recompute(false); renderPlan(); renderAll();
+if(!state.onboarded) startOnboarding(false); else { saveNow(); statement(); repoNotice(la0); }
 function urlSync(){ try{ const raw=(location.search||"")+" "+(location.hash||""); if(raw.trim().length<3) return; let t=raw; try{ t=decodeURIComponent(raw.replace(/\+/g," ")); }catch(e){} t=t.replace(/[?#&]/g," "); if(parseSync(t)) applySync(t); try{ history.replaceState(null,"",location.pathname); }catch(e){} }catch(e){} }
 urlSync(); window.addEventListener("hashchange",urlSync);
 (async()=>{ try{ await PDB.open(); photos=(await PDB.all()).sort((a,b)=>a.k<b.k?-1:1); recompute(false); renderAll(); }catch(e){ renderPhotos(); } })();
-document.addEventListener("visibilitychange",()=>{ if(document.hidden) return; const k=key(new Date()); if(k!==todayKey){ if(sel===todayKey) sel=k; todayKey=k; recompute(false); renderAll(); } });
+document.addEventListener("visibilitychange",()=>{ if(document.hidden) return; const k=key(new Date()); if(k!==todayKey){ if(sel===todayKey) sel=k; todayKey=k; const la=state.lastAsset||0; recompute(false); renderAll(); statement(); repoNotice(la); } });
 if("serviceWorker" in navigator){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
 try{ navigator.storage&&navigator.storage.persist&&navigator.storage.persist(); }catch(e){}
 })();
