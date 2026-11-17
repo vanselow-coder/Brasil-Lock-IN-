@@ -204,6 +204,19 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--palm)}
 .nwnext{margin-top:14px}
 .nwnext b{font-size:15px}
 .nwnext .bar i{background:#F2C230}
+.split{display:flex;gap:12px;margin-top:16px}
+.split>div{flex:1;background:rgba(14,18,48,.4);border-radius:16px;padding:12px 14px}
+.split b{display:block;font-family:var(--display);font-size:25px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+.split .inc{color:var(--palm)}
+.mk{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid rgba(162,168,220,.16)}
+.mk:first-child{border-top:0}
+.mk>i{font-style:normal;font-size:28px;flex:0 0 36px;text-align:center}
+.mk>span{flex:1;min-width:0;font-size:15px;font-weight:700}
+.mk small{display:block;font-size:12.5px;font-weight:500;color:var(--mute);margin-top:2px}
+.mk small b{color:var(--palm);font-weight:700}
+.mk .btn{flex:0 0 auto}
+.mk.locked{opacity:.45}
+.mk.own>i{filter:none}
 .asset b{font-size:27px}
 .asset small{display:block;font-size:11px;font-weight:700;color:#F2C230;margin-top:3px}
 .asset.off small{color:var(--mute)}
@@ -355,16 +368,21 @@ nav button.on{color:var(--night);background:var(--palm)}
       <div class="nw" id="nwVal">$0</div>
       <div class="row" style="gap:8px;flex-wrap:wrap"><span class="pill g" id="nwToday"></span><span class="pill" id="nwTitle"></span><span class="pill r" id="nwLost"></span></div>
       <div id="nwChart"></div>
-      <div class="nwnext">
-        <div class="row between"><b id="nwNextName"></b><span class="sub" id="nwNextLeft"></span></div>
-        <div class="bar"><i id="nwBar" style="width:0"></i></div>
+      <div class="split">
+        <div><span class="sub">Cash to spend</span><b id="nwCash">$0</b></div>
+        <div><span class="sub">Income a day</span><b id="nwInc" class="inc">$0</b></div>
       </div>
     </div>
 
     <div class="card">
       <div class="row between"><h2 style="margin:0">Portfolio</h2><span class="sub" id="pfCount"></span></div>
-      <div class="sub" style="margin:4px 0 12px">Assets are added automatically as your net worth grows.</div>
-      <div class="badges" id="portfolio"></div>
+      <div id="portfolio"></div>
+    </div>
+
+    <div class="card">
+      <div class="row between"><h2 style="margin:0">Marketplace</h2><span class="pill y" id="mkCash"></span></div>
+      <div class="sub" style="margin:4px 0 6px">Investments pay you every day. Lifestyle assets pay nothing, they're just yours.</div>
+      <div id="market"></div>
     </div>
 
     <div class="card">
@@ -373,7 +391,8 @@ nav button.on{color:var(--night);background:var(--palm)}
       <div class="ex"><div>Each essential left unticked<small>Charged at midnight</small></div><span style="color:var(--red);font-weight:800" id="hrFine">−$20K</span></div>
       <div class="ex"><div>A day with nothing ticked<small>On top of the missed essentials</small></div><span style="color:var(--red);font-weight:800" id="hrCrash">−$100K</span></div>
       <div class="ex"><div>Failing the weekly boss<small>Charged on Sunday night</small></div><span style="color:var(--red);font-weight:800" id="hrBoss">−$150K</span></div>
-      <div class="ex"><div>Falling below an asset's price<small>It's repossessed until you earn it back</small></div><span>Repo</span></div>
+      <div class="ex"><div>Assets you own<small>Investments pay you every day, even on rest days</small></div><span style="color:var(--green);font-weight:800">Income</span></div>
+      <div class="ex"><div>A fine you can't cover<small>Your cheapest asset is sold off at half price</small></div><span style="color:var(--red);font-weight:800">Fire sale</span></div>
       <div class="sub" style="margin-top:10px" id="hrMode"></div>
       <div class="sub" style="margin-top:6px">Net worth can't go below $0. Complementary habits never cost you anything. Your XP and level are never reduced.</div>
     </div>
@@ -491,7 +510,7 @@ nav button.on{color:var(--night);background:var(--palm)}
       <div class="sub" style="margin-bottom:10px">Your data and photos live on this phone only. Export a backup now and then.</div>
       <div class="row"><button class="btn" id="expBtn" style="flex:1">Export backup</button><label class="btn ghost" style="flex:1;text-align:center">Import<input id="impIn" type="file" accept="application/json,.json" style="display:none"></label></div>
     </div>
-    <div class="saved">Lockd v18</div>
+    <div class="saved">Lockd v19</div>
   </section>
 </div>
 
@@ -583,6 +602,7 @@ const BADGES=[
   {id:"photo",i:"📸",n:"Snapshot",d:"Add your first progress photo",t:g=>g.photoN>=1},
   {id:"multi",i:"🧠",n:"Renaissance",d:"Earn XP in 3 life areas",t:g=>Object.values(g.cat).filter(v=>v>0).length>=3},
   {id:"mill",i:"💵",n:"Millionaire",d:"Reach a net worth of $1M",t:g=>g.worth>=1000},
+  {id:"landlord",i:"🔑",n:"Landlord",d:"Earn $100K a day from your assets",t:g=>g.income>=100},
   {id:"x5k",i:"💰",n:"5K Club",d:"Earn 5,000 XP",t:g=>g.xp>=5000}
 ];
 
@@ -590,7 +610,7 @@ const TIMES=[["am","Morning"],["mid","Midday"],["pm","Night"],["any","Anytime"]]
 const SEEDTT={sleep:["am","e"],trained:["am","e"],stairs:["am","c"],fasted:["mid","e"],kcal:["pm","e"],protein:["pm","e"],steps:["pm","e"],noalc:["pm","e"],t_sleep:["am","e"],t_move:["any","e"],t_protein:["pm","e"],t_steps:["pm","e"],t_water:["pm","e"]};
 function nowSlot(){ const h=new Date().getHours(); return h<12?"am":h<17?"mid":"pm"; }
 const isEss=h=>h.tier!=="c";
-const FINE=20, CRASH=100, BOSSFAIL=150;
+const FINE=6, CRASH=25, BOSSFAIL=40;
 const DEF={steps:[15000,"steps a day"],t_steps:[10000,"steps a day"],kcal:[1900,"kcal a day"],protein:[160,"grams a day"],sleep:[7.5,"hours"],t_sleep:[7,"hours"],t_water:[3,"litres"]};
 function tgt(h){ const d=DEF[h.id]; if(!d) return null; return (h.target>0)?+h.target:d[0]; }
 function tgtOf(id){ const h=state.habits.find(x=>x.id===id); return h?tgt(h):(DEF[id]?DEF[id][0]:null); }
@@ -619,6 +639,7 @@ function migrate(fresh){
     if(fresh){ state.habits=[]; state.event=null; state.plan=null; state.startKey=todayKey; state.travel={on:false,from:"",to:""}; state.name=""; }
     else { if(state.event===undefined) state.event={name:"Rio",date:FLIGHTKEY}; if(state.plan===undefined) state.plan="kinobody"; if(!state.startKey) state.startKey=STARTKEY; } }
   if(state.stakes===undefined) state.stakes=1;
+  if(!Array.isArray(state.tx)){ state.tx=[]; state.seenForced=0; delete state.lastAsset; delete state.peakAsset; }
   state.v=2; if(!state.days) state.days={}; if(!(state.goal>0)) state.goal=72;
   if(!Array.isArray(state.habits)) state.habits=SEED.map(h=>Object.assign({from:STARTKEY},h));
   state.habits.forEach(h=>{ const d=SEEDTT[h.id]; if(!h.time) h.time=d?d[0]:"any"; if(!h.tier) h.tier=d?d[1]:"e"; });
@@ -681,11 +702,29 @@ function compute(){
   }
   xp+=bossXp;
   const bossAt={}, failAt={}; weeks.forEach(w=>{ const e=addK(w.m,6); if(w.done){ const k=e>todayKey?todayKey:e; bossAt[k]=(bossAt[k]||0)+w.b.xp; } else if(e<todayKey&&w.m>=penFrom){ w.failed=true; if(SM) failAt[e]=BOSSFAIL*SM; } });
-  let worth=0, lostTotal=0; const series=[];
-  for(let k=first;k<=todayKey;k=addK(k,1)){ const i=info[k], before=worth+i.xp+(bossAt[k]||0); worth=Math.max(0,before-(i.fine||0)-(failAt[k]||0)); lostTotal+=before-worth; series.push(worth); }
+  const txDay={}; (state.tx||[]).forEach(t=>{ if(MK[t.id]) (txDay[t.d]=txDay[t.d]||[]).push(t); });
+  const held=new Set(), forced=[], series=[]; let cash=0, lostTotal=0, incomeTotal=0, spentTotal=0;
+  const hv=()=>{ let v=0; held.forEach(id=>v+=MK[id][3]); return v; };
+  for(let k=first;k<=todayKey;k=addK(k,1)){
+    const i=info[k];
+    let inc=0; held.forEach(id=>inc+=MK[id][4]);
+    i.income=inc; incomeTotal+=inc;
+    cash+=inc+i.xp+(bossAt[k]||0);
+    (txDay[k]||[]).forEach(t=>{ if(t.k==="b"){ cash-=t.p; held.add(t.id); spentTotal+=t.p; } else { cash+=t.p; held.delete(t.id); } });
+    const fine=(i.fine||0)+(failAt[k]||0); i.charged=fine;
+    if(fine>0){
+      const netBefore=cash+hv();
+      cash-=fine;
+      while(cash<0&&held.size){ let ch=null; held.forEach(id=>{ if(!ch||MK[id][3]<MK[ch][3]) ch=id; }); held.delete(ch); cash+=MK[ch][3]*FIRESALE; forced.push({d:k,id:ch}); }
+      if(cash<0) cash=0;
+      lostTotal+=Math.max(0,netBefore-(cash+hv()));
+    }
+    series.push(cash+hv());
+  }
+  const assets=[...held], worth=cash+hv(), income=assets.reduce((a,id)=>a+MK[id][4],0);
   const level=levelOf(xp), trend=trendAt(todayKey);
   const spent=state.spent.reduce((a,s)=>a+(+s.cost||0),0);
-  const g={worth,lostTotal,series,failAt,assetN:assetCount(worth),lockedN,info,cat,streak,best,xp,perfectN,bestPerf,noalc,cutLocked,weighN,firstW,weeks,bossN,level,trend,goal:+state.goal||72,
+  const g={worth,cash,assets,income,incomeTotal,spentTotal,forced,lostTotal,series,failAt,assetN:assets.length,lockedN,info,cat,streak,best,xp,perfectN,bestPerf,noalc,cutLocked,weighN,firstW,weeks,bossN,level,trend,goal:+state.goal||72,
     lost:(trend!=null&&firstW!=null)?firstW-trend:0, coins:xp-spent, spentN:state.spent.length, photoN:photos.length,
     mult:multOf(streak)};
   g.badges=BADGES.filter(b=>{ try{return b.t(g);}catch(e){return false;} }).map(b=>b.id);
@@ -737,12 +776,11 @@ function recompute(celebrate){
   G=compute();
   if(celebrate){
     if(G.level>prevLevel) modal({ico:"⬆️",kick:"Level up",title:"Level "+G.level,text:"Rank: "+rankOf(G.level)+". Keep stacking days.",party:200});
-    for(let i=(state.lastAsset||0);i<G.assetN;i++){ const a=ASSETS[i], nx=ASSETS[i+1]; modal({ico:a[1],kick:"Added to your portfolio",title:a[0],text:"Net worth passed "+money(a[2]*1000)+"."+(nx?" Next: "+nx[0]+" at "+money(nx[2]*1000)+".":""),party:a[2]>=1000?220:130,ok:"Keep stacking"}); }
-    for(let i=G.assetN;i<(state.lastAsset||0);i++){ const a=ASSETS[i]; modal({ico:"📉",kick:"Repossessed",title:a[0],text:"Your net worth fell below "+money(a[2]*1000)+". Earn it back to reclaim it.",ok:"I'll fix it"}); }
+    for(let i=(state.seenForced||0);i<G.forced.length;i++){ const a=MK[G.forced[i].id]; modal({ico:"📉",kick:"Fire sale",title:a[1],text:"You couldn't cover a fine, so it was sold for "+money(a[3]*FIRESALE*1000)+", under its "+money(a[3]*1000)+" value.",ok:"Never again"}); }
     G.badges.forEach(id=>{ if(state.seenBadges.indexOf(id)<0){ const b=BADGES.find(x=>x.id===id); modal({ico:b.i,kick:"Badge unlocked",title:b.n,text:b.d,party:120,ok:"Nice"}); } });
     G.weeks.forEach(w=>{ if(w.done&&!state.seenBoss[w.m]) modal({ico:"⚔️",kick:"Boss defeated",title:w.b.n,text:"+"+w.b.xp+" XP bonus. A new boss arrives Monday.",party:220}); });
   }
-  state.lastLevel=G.level; state.lastAsset=G.assetN; state.peakAsset=Math.max(state.peakAsset||0,G.assetN);
+  state.lastLevel=G.level; state.seenForced=G.forced.length;
   G.badges.forEach(id=>{ if(state.seenBadges.indexOf(id)<0) state.seenBadges.push(id); });
   G.weeks.forEach(w=>{ if(w.done) state.seenBoss[w.m]=1; });
 }
@@ -878,18 +916,37 @@ function renderGame(){
   $("badges").innerHTML=BADGES.map(bd=>`<div class="bdg ${G.badges.indexOf(bd.id)<0?"off":""}" data-b="${bd.id}"><b>${bd.i}</b><span>${esc(bd.n)}</span></div>`).join("");
   renderBank(); renderRadar();
 }
-const ASSETS=[["Emergency fund","🏦",100],["First car","🚗",250],["Studio apartment","🏢",500],["City apartment","🏙️",1000],["Sports car","🏎️",2000],["Beach house in Rio","🏖️",3000],["Penthouse","🌆",5000],["Yacht","🛥️",7500],["Office building","🏬",10000],["Private jet","🛩️",15000],["Fazenda","🌾",20000],["Skyscraper","🏗️",25000],["Private island","🏝️",30000]];
+const MARKET=[
+  ["sav","Savings account","🏦",50,1,"i"],
+  ["idx","Index fund","📈",150,3,"i"],
+  ["watch","Watch","⌚",250,0,"l"],
+  ["studio","Studio apartment","🏢",400,8,"i"],
+  ["car","Sports car","🏎️",900,0,"l"],
+  ["apt","City apartment","🏙️",1200,22,"i"],
+  ["duplex","Duplex","🏘️",2500,44,"i"],
+  ["rio","Beach house in Rio","🏖️",4000,68,"i"],
+  ["pent","Penthouse","🌆",6000,0,"l"],
+  ["office","Office building","🏬",9000,145,"i"],
+  ["yacht","Yacht","🛥️",14000,0,"l"],
+  ["mall","Shopping centre","🛍️",18000,260,"i"],
+  ["farm","Fazenda","🌾",28000,390,"i"],
+  ["jet","Private jet","🛩️",40000,0,"l"],
+  ["tower","Skyscraper","🏗️",60000,780,"i"],
+  ["island","Private island","🏝️",95000,0,"l"]];
+const MK={}; MARKET.forEach(a=>MK[a[0]]=a);
+const SELLBACK=0.85, FIRESALE=0.7;
 const WEALTH=[[0,"Starting out"],[100,"Saver"],[500,"Investor"],[1000,"Millionaire"],[5000,"Multi-millionaire"],[10000,"Tycoon"],[25000,"Mogul"]];
-function assetCount(xp){ return ASSETS.filter(a=>xp>=a[2]).length; }
+
 function money(v){ v=Math.max(0,v); if(v>=1e7) return "$"+(v/1e6).toFixed(1).replace(/\.0$/,"")+"M"; if(v>=1e6) return "$"+(v/1e6).toFixed(2).replace(/\.?0+$/,"")+"M"; if(v>=1000) return "$"+Math.round(v/1000)+"K"; return "$"+Math.round(v); }
-let nwAnim=null;
-function countUp(){ const el=$("nwVal"), target=G.worth*1000; cancelAnimationFrame(nwAnim);
+let nwAnim=null, nwBusy=false;
+function countUp(){ const el=$("nwVal"), target=G.worth*1000; cancelAnimationFrame(nwAnim); nwBusy=false;
   let still=false; try{ still=window.matchMedia("(prefers-reduced-motion:reduce)").matches; }catch(e){}
   if(still||target<=0){ el.textContent=money(target); return; }
-  const t0=performance.now(), dur=900; (function step(t){ const p=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-p,3); el.textContent=money(target*e); if(p<1) nwAnim=requestAnimationFrame(step); })(t0); }
+  nwBusy=true;
+  const t0=performance.now(), dur=900; (function step(t){ const p=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-p,3); el.textContent=money(target*e); if(p<1) nwAnim=requestAnimationFrame(step); else nwBusy=false; })(t0); }
 function renderBank(){
   const xp=G.worth, tx=(G.info[todayKey]||{}).xp||0;
-  if(!$("v-game").classList.contains("on")) $("nwVal").textContent=money(xp*1000);
+  if(!nwBusy) $("nwVal").textContent=money(xp*1000);
   $("nwToday").textContent="+"+money(tx*1000)+" banked today"; $("nwToday").style.display=tx>0?"":"none";
   let title=WEALTH[0][1]; WEALTH.forEach(w=>{ if(xp>=w[0]) title=w[1]; }); $("nwTitle").textContent=title;
   const sm=+state.stakes||0; $("hrFine").textContent=sm?"−"+money(FINE*sm*1000):"Off"; $("hrCrash").textContent=sm?"−"+money(CRASH*sm*1000):"Off"; $("hrBoss").textContent=sm?"−"+money(BOSSFAIL*sm*1000):"Off";
@@ -903,11 +960,13 @@ function renderBank(){
     o+=`<path d="${line} L${X(n-1).toFixed(1)} ${H-pb} L${X(0).toFixed(1)} ${H-pb}Z" fill="#F2C230" opacity=".13"/><path d="${line}" fill="none" stroke="#F2C230" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`; }
   o+=`<circle cx="${X(n-1).toFixed(1)}" cy="${Y(pts[n-1]).toFixed(1)}" r="5" fill="#F2C230" stroke="#161B48" stroke-width="2.5"/></svg>`;
   $("nwChart").innerHTML=o+`<div class="row between sub" style="font-size:12px;margin-top:4px"><span>${fmt(firstKey())}</span><span>${n} day${n>1?"s":""}</span><span>Today</span></div>`;
-  const nx=ASSETS[G.assetN], pv=G.assetN?ASSETS[G.assetN-1][2]:0;
-  if(nx){ $("nwNextName").textContent="Next: "+nx[1]+" "+nx[0]; $("nwNextLeft").textContent=money((nx[2]-xp)*1000)+" to go"; $("nwBar").style.width=Math.max(2,Math.min(100,(xp-pv)/(nx[2]-pv)*100))+"%"; }
-  else { $("nwNextName").textContent="Portfolio complete"; $("nwNextLeft").textContent=""; $("nwBar").style.width="100%"; }
-  $("pfCount").textContent=G.assetN+" of "+ASSETS.length;
-  $("portfolio").innerHTML=ASSETS.map((a,i)=>{ const own=i<G.assetN, repo=!own&&i<(state.peakAsset||0); return `<div class="bdg asset ${own?"":repo?"repo":"off"}"><b>${a[1]}</b><span>${esc(a[0])}</span><small>${repo?"Repossessed":money(a[2]*1000)}</small></div>`; }).join("");
+  $("nwCash").textContent=money(G.cash*1000); $("nwInc").textContent=(G.income?"+":"")+money(G.income*1000);
+  $("mkCash").textContent=money(G.cash*1000)+" to spend";
+  const own=G.assets.slice().sort((a,b)=>MK[b][3]-MK[a][3]);
+  $("pfCount").textContent=own.length?own.length+" owned · "+money(own.reduce((t,id)=>t+MK[id][3],0)*1000):"Nothing yet";
+  $("portfolio").innerHTML=own.length?own.map(id=>{ const a=MK[id]; return `<div class="mk own"><i>${a[2]}</i><span>${esc(a[1])}<small>${a[4]?`Pays <b>+${money(a[4]*1000)}</b> a day`:"Lifestyle"} · worth ${money(a[3]*1000)}</small></span><button class="btn ghost sm" data-sell="${a[0]}">Sell</button></div>`; }).join(""):`<div class="sub">You don't own anything yet. Buy your first asset below and it starts paying you tomorrow.</div>`;
+  const buy=MARKET.filter(a=>G.assets.indexOf(a[0])<0);
+  $("market").innerHTML=buy.length?buy.map(a=>{ const can=G.cash>=a[3]; return `<div class="mk ${can?"":"locked"}"><i>${a[2]}</i><span>${esc(a[1])}<small>${a[4]?`Pays <b>+${money(a[4]*1000)}</b> a day`:"Lifestyle · no income"}${can?"":" · "+money((a[3]-G.cash)*1000)+" short"}</small></span><button class="btn sm" data-buy="${a[0]}" ${can?"":"disabled"}>${money(a[3]*1000)}</button></div>`; }).join(""):`<div class="sub">You own everything on the market. Nothing left to buy.</div>`;
 }
 function renderRadar(){
   const cs=Object.keys(CATS), vals=cs.map(c=>G.cat[c]||0), mx=Math.max.apply(null,vals.concat([1])), W=300,H=230,cx=150,cy=115,R=74;
@@ -977,6 +1036,16 @@ $("rvNext").addEventListener("click",()=>{ rvWeek=addK(rvWeek,7); renderReview()
 $("goalBtn").addEventListener("click",()=>{ const v=parseFloat($("goalIn").value); if(v>0){ state.goal=v; changed(true); toast("Goal set to "+v.toFixed(1)+" kg"); } });
 
 /* badges + shop */
+function trade(id,sell){
+  const a=MK[id]; if(!a) return;
+  if(sell){ const back=Math.round(a[3]*SELLBACK);
+    modal({ico:a[2],kick:"Sell",title:a[1],text:"You get "+money(back*1000)+" back, which is "+money((a[3]-back)*1000)+" less than it's worth"+(a[4]?", and you lose "+money(a[4]*1000)+" a day.":"."),ok:"Sell it",cancel:"Keep it",onOk:()=>{ state.tx.push({d:todayKey,id,k:"s",p:back}); changed(false); toast("Sold for "+money(back*1000)); }}); return; }
+  if(G.cash<a[3]){ toast("Not enough cash"); return; }
+  modal({ico:a[2],kick:"Buy",title:a[1],text:a[4]?"Costs "+money(a[3]*1000)+" and pays you "+money(a[4]*1000)+" every day from tomorrow. It pays for itself in "+Math.ceil(a[3]/a[4])+" days.":"Costs "+money(a[3]*1000)+". No income, purely yours.",ok:"Buy it",cancel:"Not yet",onOk:()=>{
+    state.tx.push({d:todayKey,id,k:"b",p:a[3]}); changed(false); confetti(140); beep([523,659,784,1047],0.13); buzz([20,30,60]); toast(a[1]+" is yours"); }});
+}
+$("portfolio").addEventListener("click",e=>{ const b=e.target.closest("[data-sell]"); if(b) trade(b.dataset.sell,true); });
+$("market").addEventListener("click",e=>{ const b=e.target.closest("[data-buy]"); if(b) trade(b.dataset.buy,false); });
 $("badges").addEventListener("click",e=>{ const t=e.target.closest(".bdg"); if(!t) return; const b=BADGES.find(x=>x.id===t.dataset.b); const got=G.badges.indexOf(b.id)>=0; modal({ico:b.i,kick:got?"Unlocked":"Locked",title:b.n,text:b.d,ok:"OK"}); });
 /* habits */
 $("hbAdd").addEventListener("click",()=>{ const n=$("hbName").value.trim(); if(!n){ toast("Name the habit"); return; }
@@ -1117,7 +1186,7 @@ function obRender(){
     <button class="opt ${a.plan?"on":""}" data-plan="1" style="margin-top:18px"><i>🏋️</i><span>Add the gym plan<small>Push, Pull, Legs rotation with sets and reps each day</small></span><em class="tk"></em></button>`;
   if(id==="habits"){ obDefaults(); h=`<h1>Pick your habits</h1><p>Tap a habit to add it. Essential habits count toward your score, streak and fines. Bonus ones only add XP. Tap the tag to switch.</p>`;
     Object.keys(CATS).filter(c=>a.areas[c]).forEach(c=>{ h+=`<h3 style="color:${CATS[c]}">${c}</h3>`+CATALOG.filter(x=>x.cat===c&&obAvail(x)).map(x=>{ const v=a.habits[x.id]; return `<div class="opt ${v.on?"on":""}" data-hb="${x.id}" role="button" tabindex="0"><em class="tk"></em><span>${esc(obName(x))}<small>${TIMES.find(t=>t[0]===x.time)[1]} · +${x.xp} XP</small></span><button class="tg ${v.tier==="c"?"c":""}" data-tg="${x.id}">${v.tier==="c"?"Bonus":"Essential"}</button></div>`; }).join(""); }); }
-  if(id==="stakes") h=`<h1>How hard do you want to play?</h1><p>Fines come out of your net worth at midnight for every essential you miss.</p>`+[[0,"🌴","Casual","No fines. Just build."],[1,"⚖️","Standard","$20K per missed essential, $100K for an empty day"],[2,"🔥","Hardcore","Double fines. Assets get repossessed fast."]].map(o=>`<button class="opt ${a.stakes===o[0]?"on":""}" data-stk="${o[0]}"><i>${o[1]}</i><span>${o[2]}<small>${o[3]}</small></span><em class="tk"></em></button>`).join("");
+  if(id==="stakes") h=`<h1>How hard do you want to play?</h1><p>Fines come out of your net worth at midnight for every essential you miss.</p>`+[[0,"🌴","Casual","No fines. Just build."],[1,"⚖️","Standard","$6K per missed essential, $25K more for an empty day"],[2,"🔥","Hardcore","Double fines. A wasted day really hurts."]].map(o=>`<button class="opt ${a.stakes===o[0]?"on":""}" data-stk="${o[0]}"><i>${o[1]}</i><span>${o[2]}<small>${o[3]}</small></span><em class="tk"></em></button>`).join("");
   if(id==="sum"){ obDefaults(); const pick=CATALOG.filter(x=>obAvail(x)&&a.habits[x.id].on), e=pick.filter(x=>a.habits[x.id].tier!=="c").length;
     h=`<h1>${a.name?esc(a.name)+", you're":"You're"} set</h1><p>${OB.redo?"Saving replaces your habit list with the one below. Your history, XP and net worth are kept.":"Here's your game. Everything can be changed later in More."}</p><div class="card" style="margin-top:0">`
       +`<div class="sumrow">Goal<span>${GOALS.find(g=>g[0]===a.goal)[2]}</span></div><div class="sumrow">Habits<span>${e} essential, ${pick.length-e} bonus</span></div>`
@@ -1161,16 +1230,16 @@ $("stakesSel").addEventListener("change",()=>{ state.stakes=+$("stakesSel").valu
 function statement(){
   if(state.stmtDay===todayKey) return; const had=state.stmtDay; state.stmtDay=todayKey; saveNow();
   const y=addK(todayKey,-1), i=G.info[y]; if(!had||!i||y<(state.penFrom||todayKey)) return;
-  const bf=G.failAt[y]||0, out=(i.fine||0)+bf, net=i.xp-out;
-  modal({ico:out>0?"🧾":"💰",kick:"Yesterday's statement",title:(net>=0?"+":"−")+money(Math.abs(net)*1000),text:"Banked "+money(i.xp*1000)+". "+(i.fine>0?"Fined "+money(i.fine*1000)+" for "+i.miss+" missed essential"+(i.miss===1?"":"s")+(i.zero?" and a zero day":"")+". ":"No fines. ")+(bf?"Lost "+money(bf*1000)+" for failing the weekly boss.":""),ok:out>0?"Do better today":"Keep stacking"});
+  const bf=G.failAt[y]||0, out=(i.fine||0)+bf, inc=i.income||0, net=i.xp+inc-out;
+  modal({ico:out>0?"🧾":inc>0?"💸":"💰",kick:"Yesterday's statement",title:(net>=0?"+":"−")+money(Math.abs(net)*1000),text:(inc>0?"Your assets paid "+money(inc*1000)+". ":"")+"You banked "+money(i.xp*1000)+". "+(i.fine>0?"Fined "+money(i.fine*1000)+" for "+i.miss+" missed essential"+(i.miss===1?"":"s")+(i.zero?" and a zero day":"")+". ":"No fines. ")+(bf?"Lost "+money(bf*1000)+" for failing the weekly boss.":""),ok:out>0?"Do better today":"Keep stacking"});
 }
-function repoNotice(la){ for(let i=G.assetN;i<la;i++){ const a=ASSETS[i]; modal({ico:"📉",kick:"Repossessed",title:a[0],text:"Your net worth fell below "+money(a[2]*1000)+". Earn it back to reclaim it.",ok:"I will fix it"}); } }
-load(); const la0=state.lastAsset||0; recompute(false); renderPlan(); renderAll();
-if(!state.onboarded) startOnboarding(false); else { saveNow(); statement(); repoNotice(la0); }
+function repoNotice(n){ for(let i=n;i<G.forced.length;i++){ const a=MK[G.forced[i].id]; modal({ico:"📉",kick:"Fire sale",title:a[1],text:"You couldn't cover a fine, so it was sold for "+money(a[3]*FIRESALE*1000)+".",ok:"Never again"}); } state.seenForced=G.forced.length; }
+load(); const sf0=state.seenForced||0; recompute(false); renderPlan(); renderAll();
+if(!state.onboarded) startOnboarding(false); else { saveNow(); statement(); repoNotice(sf0); }
 function urlSync(){ try{ const raw=(location.search||"")+" "+(location.hash||""); if(raw.trim().length<3) return; let t=raw; try{ t=decodeURIComponent(raw.replace(/\+/g," ")); }catch(e){} t=t.replace(/[?#&]/g," "); if(parseSync(t)) applySync(t); try{ history.replaceState(null,"",location.pathname); }catch(e){} }catch(e){} }
 urlSync(); window.addEventListener("hashchange",urlSync);
 (async()=>{ try{ await PDB.open(); photos=(await PDB.all()).sort((a,b)=>a.k<b.k?-1:1); recompute(false); renderAll(); }catch(e){ renderPhotos(); } })();
-document.addEventListener("visibilitychange",()=>{ if(document.hidden) return; const k=key(new Date()); if(k!==todayKey){ if(sel===todayKey) sel=k; todayKey=k; const la=state.lastAsset||0; recompute(false); renderAll(); statement(); repoNotice(la); } });
+document.addEventListener("visibilitychange",()=>{ if(document.hidden) return; const k=key(new Date()); if(k!==todayKey){ if(sel===todayKey) sel=k; todayKey=k; const sf=state.seenForced||0; recompute(false); renderAll(); statement(); repoNotice(sf); } });
 if("serviceWorker" in navigator){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
 try{ navigator.storage&&navigator.storage.persist&&navigator.storage.persist(); }catch(e){}
 })();
